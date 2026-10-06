@@ -37,7 +37,12 @@ export function isScope(v: unknown): v is Scope {
   if (typeof v !== 'object' || v === null) return false
   const o = v as Record<string, unknown>
   const ok = (k: string) => o[k] === undefined || typeof o[k] === 'string'
-  return ok('vin') && ok('cat') && ok('model') && (typeof o.vin === 'string' || typeof o.cat === 'string')
+  return (
+    ok('vin') &&
+    ok('cat') &&
+    ok('model') &&
+    (typeof o.vin === 'string' || typeof o.cat === 'string')
+  )
 }
 
 export function isScopeOrNull(v: unknown): v is Scope | null {

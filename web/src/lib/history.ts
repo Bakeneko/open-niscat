@@ -14,7 +14,12 @@ export function pushHistory(list: readonly HistoryEntry[], e: HistoryEntry): His
 function isEntry(v: unknown): v is HistoryEntry {
   if (typeof v !== 'object' || v === null) return false
   const o = v as Record<string, unknown>
-  return (o.kind === 'vehicle' || o.kind === 'section') && typeof o.label === 'string' && typeof o.path === 'string' && typeof o.at === 'number'
+  return (
+    (o.kind === 'vehicle' || o.kind === 'section') &&
+    typeof o.label === 'string' &&
+    typeof o.path === 'string' &&
+    typeof o.at === 'number'
+  )
 }
 
 export function isHistory(v: unknown): v is HistoryEntry[] {

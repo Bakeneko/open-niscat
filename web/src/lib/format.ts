@@ -5,7 +5,10 @@ export function formatYearMonth(ym: string | null | undefined, long = false): st
   return long ? `${m[2]}/${m[1]}` : `${m[2]}/${m[1].slice(2)}`
 }
 
-export function formatRange(from: string | null | undefined, to: string | null | undefined): string {
+export function formatRange(
+  from: string | null | undefined,
+  to: string | null | undefined,
+): string {
   const f = formatYearMonth(from)
   const t = formatYearMonth(to)
   if (f === '' && t === '') return ''

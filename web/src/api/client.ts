@@ -9,7 +9,10 @@ export class ApiError extends Error {
   }
 }
 
-export function apiPath(path: string, params: Record<string, string | number | undefined> = {}): string {
+export function apiPath(
+  path: string,
+  params: Record<string, string | number | undefined> = {},
+): string {
   const q = new URLSearchParams()
   for (const [k, v] of Object.entries(params)) {
     if (v !== undefined && v !== '') q.set(k, String(v))

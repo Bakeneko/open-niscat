@@ -18,7 +18,10 @@ describe('useFetch', () => {
       'fetch',
       vi.fn((url: string) => {
         calls.push(url)
-        if (url === '/bad') return Promise.resolve(new Response('{"error":"not_found","message":"nope"}', { status: 404 }))
+        if (url === '/bad')
+          return Promise.resolve(
+            new Response('{"error":"not_found","message":"nope"}', { status: 404 }),
+          )
         return Promise.resolve(new Response(JSON.stringify({ url }), { status: 200 }))
       }),
     )

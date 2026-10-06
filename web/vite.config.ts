@@ -1,4 +1,4 @@
-import { writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig, type Plugin } from 'vite'
@@ -9,7 +9,9 @@ import vuetify from 'vite-plugin-vuetify'
 function keepDistPlaceholder(): Plugin {
   return {
     name: 'keep-dist-placeholder',
+    apply: 'build',
     closeBundle() {
+      mkdirSync(fileURLToPath(new URL('./dist', import.meta.url)), { recursive: true })
       writeFileSync(fileURLToPath(new URL('./dist/.gitkeep', import.meta.url)), '')
     },
   }

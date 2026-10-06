@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { isScope, isScopeOrNull, sameScope, scopeFromQuery, scopeLabel, scopeToQuery } from '../scope'
+import {
+  isScope,
+  isScopeOrNull,
+  sameScope,
+  scopeFromQuery,
+  scopeLabel,
+  scopeToQuery,
+} from '../scope'
 
 describe('scope', () => {
   it('reads the query, VIN first', () => {

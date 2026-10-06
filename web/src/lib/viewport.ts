@@ -11,7 +11,14 @@ export function fitView(cw: number, ch: number, iw: number, ih: number): View {
   return { scale, x: (cw - iw * scale) / 2, y: (ch - ih * scale) / 2 }
 }
 
-export function zoomAt(v: View, factor: number, px: number, py: number, min: number, max: number): View {
+export function zoomAt(
+  v: View,
+  factor: number,
+  px: number,
+  py: number,
+  min: number,
+  max: number,
+): View {
   const scale = Math.min(max, Math.max(min, v.scale * factor))
   const k = scale / v.scale
   return { scale, x: px - (px - v.x) * k, y: py - (py - v.y) * k }

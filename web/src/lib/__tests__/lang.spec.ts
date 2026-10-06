@@ -15,7 +15,9 @@ describe('lang', () => {
     expect(localizedPath('fr', 'cart')).toBe('/fr/cart')
   })
   it('switches language keeping path, query and hash', () => {
-    expect(switchLang('/section/AA/233C?vin=X&item=4&tab=info', 'fr')).toBe('/fr/section/AA/233C?vin=X&item=4&tab=info')
+    expect(switchLang('/section/AA/233C?vin=X&item=4&tab=info', 'fr')).toBe(
+      '/fr/section/AA/233C?vin=X&item=4&tab=info',
+    )
     expect(switchLang('/fr/section/AA/233C?vin=X#top', 'en')).toBe('/section/AA/233C?vin=X#top')
     expect(switchLang('/fr', 'en')).toBe('/')
     expect(switchLang('/fr?x=1', 'en')).toBe('/?x=1')
