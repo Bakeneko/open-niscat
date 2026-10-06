@@ -49,7 +49,7 @@ watch(vehicle.data, (v) => {
 </script>
 
 <template>
-  <v-container>
+  <v-container style="max-width: 1400px">
     <v-alert v-if="current === null" type="info" variant="tonal">
       <RouterLink :to="links.to('/', {}, false)">{{ t('scope.choose') }}</RouterLink>
     </v-alert>

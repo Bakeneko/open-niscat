@@ -26,6 +26,29 @@
   z-index: 2;
   background: rgb(var(--v-theme-surface));
 }
+/* Desktop pages that fill the viewport: drawing on the left, a fixed-width side panel scrolling on its own. */
+.page-fill {
+  height: calc(100dvh - var(--v-layout-top, 0px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.split {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(520px, 32vw, 820px);
+  gap: 8px;
+}
+.split > * {
+  min-height: 0;
+  height: 100%;
+}
+.split-side {
+  overflow-y: auto;
+  /* Room for controls that overflow their box (switch thumb, focus rings): the scroll container clips them. */
+  padding: 4px 8px;
+}
 .print-only {
   display: none;
 }
@@ -35,6 +58,15 @@
   }
   .print-only {
     display: block;
+  }
+  .page-fill,
+  .split {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+  .split > * {
+    height: auto;
   }
   .v-main {
     padding: 0 !important;

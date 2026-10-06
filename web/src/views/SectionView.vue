@@ -95,7 +95,7 @@ watch([selected, data], async ([key, s]) => {
 </script>
 
 <template>
-  <v-container fluid class="pa-2">
+  <v-container fluid class="pa-2" :class="{ 'page-fill': !smAndDown }">
     <v-progress-linear v-if="loading" indeterminate />
     <ErrorAlert :error="error" @retry="reload" />
     <template v-if="data">
@@ -171,48 +171,32 @@ watch([selected, data], async ([key, s]) => {
           <PartsTable :lines="data.lines" :selected="selected" @select="select" @add="add" />
         </div>
       </template>
-      <v-row v-else dense>
-        <v-col cols="7" class="print-full">
-          <DrawingViewer
-            :src="data.image"
-            :hotspots="data.hotspots"
-            :selected="selected"
-            :titles="titles"
-            class="viewer-desktop"
-            @select="select"
-          />
-        </v-col>
-        <v-col cols="5" class="section-panel print-full">
+      <div v-else class="split">
+        <DrawingViewer
+          :src="data.image"
+          :hotspots="data.hotspots"
+          :selected="selected"
+          :titles="titles"
+          @select="select"
+        />
+        <div class="split-side">
           <PartDetail :lines="selectedLines" class="mb-2 no-print" @add="add" />
           <PartsTable :lines="data.lines" :selected="selected" @select="select" @add="add" />
-        </v-col>
-      </v-row>
+        </div>
+      </div>
     </template>
   </v-container>
 </template>
 
 <style scoped>
-.section-panel,
-.viewer-desktop {
-  height: calc(100vh - 150px);
-}
-.section-panel {
-  overflow-y: auto;
-}
 .viewer-mobile {
   height: 70vh;
 }
 /* Printed plate: drawing at full width, then the table; mobile tabs print both panes. */
 @media print {
-  .section-panel,
-  .viewer-desktop,
   .viewer-mobile {
     height: auto;
     overflow: visible;
-  }
-  .print-full {
-    flex: 0 0 100%;
-    max-width: 100%;
   }
   .print-show {
     display: block !important;

@@ -66,13 +66,13 @@ const titles = computed(() => {
 </script>
 
 <template>
-  <v-container fluid>
+  <v-container fluid :class="{ 'page-fill': mdAndUp && data?.group.image }">
     <v-progress-linear v-if="loading" indeterminate />
     <ErrorAlert :error="error" @retry="reload" />
     <template v-if="data">
       <h1 class="text-h6 mb-2">{{ data.group.code }} — {{ data.group.label }}</h1>
-      <v-row>
-        <v-col v-if="data.group.image" cols="12" md="7">
+      <div :class="{ split: mdAndUp && data.group.image }">
+        <div v-if="data.group.image">
           <DrawingViewer
             :src="data.group.image"
             :hotspots="spots.shown"
@@ -80,11 +80,11 @@ const titles = computed(() => {
             labels
             :selected="selected"
             :titles="titles"
-            :style="{ height: mdAndUp ? 'calc(100vh - 160px)' : '60vh' }"
+            :style="{ height: mdAndUp ? '100%' : '60vh' }"
             @select="(k) => (selected = selected === k ? null : k)"
           />
-        </v-col>
-        <v-col cols="12" :md="data.group.image ? 5 : 12">
+        </div>
+        <div class="split-side">
           <div class="d-flex align-center flex-wrap ga-2 mb-2">
             <v-chip v-if="caption" closable @click:close="selected = null">{{
               t('group.filtered', { caption })
@@ -113,8 +113,8 @@ const titles = computed(() => {
               </template>
             </v-list-item>
           </v-list>
-        </v-col>
-      </v-row>
+        </div>
+      </div>
     </template>
   </v-container>
 </template>
