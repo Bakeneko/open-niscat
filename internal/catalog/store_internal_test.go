@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -65,7 +66,35 @@ func TestSmallHelpers(t *testing.T) {
 	if got := str(sql.NullString{}); got != "" {
 		t.Errorf("str(NULL) = %q", got)
 	}
-	if got := dsn(`C:\data\data.db`); got != "file:///C:/data/data.db?mode=ro&_pragma=query_only(1)" && !strings.HasPrefix(got, "file:///") {
-		t.Errorf("dsn = %q", got)
+}
+
+func TestDSN(t *testing.T) {
+	const query = "?mode=ro&_pragma=query_only(1)"
+	cases := map[string]string{
+		"/srv/data/data.db":  "file:///srv/data/data.db" + query,
+		"/srv/my data/#1.db": "file:///srv/my%20data/%231.db" + query,
+		"/srv/50%/data.db":   "file:///srv/50%25/data.db" + query,
+	}
+	if runtime.GOOS == "windows" {
+		cases[`C:\data\data.db`] = "file:///C:/data/data.db" + query
+	}
+	for in, want := range cases {
+		if got := dsn(in); got != want {
+			t.Errorf("dsn(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
+
+func TestStoreIsReadOnly(t *testing.T) {
+	s := openInternal(t)
+	ctx := context.Background()
+	if _, err := s.db.ExecContext(ctx, "INSERT INTO cinfo VALUES ('x', 'y')"); err == nil {
+		t.Fatal("INSERT succeeded on a store that must be read-only")
+	}
+	if _, err := s.db.ExecContext(ctx, "PRAGMA query_only = 0"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.db.ExecContext(ctx, "INSERT INTO cinfo VALUES ('x', 'y')"); err == nil {
+		t.Fatal("INSERT succeeded after disabling query_only: the file is not opened read-only")
 	}
 }
