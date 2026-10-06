@@ -72,3 +72,12 @@
     padding: 0 !important;
   }
 }
+/* Lists: titles wrap instead of being cut with "…" from medium screens up; small screens keep one line. */
+@media (min-width: 960px) {
+  .v-list-item-title {
+    white-space: normal;
+  }
+  .v-list-item-subtitle {
+    -webkit-line-clamp: unset;
+  }
+}
