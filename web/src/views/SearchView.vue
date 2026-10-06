@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { mdiMagnify } from '@mdi/js'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { apiPath } from '@/api/client'
@@ -41,10 +42,34 @@ const pages = computed(() => Math.max(1, Math.ceil((data.value?.total ?? 0) / PA
 function setQuery(patch: Record<string, string>) {
   void router.replace({ query: { ...route.query, ...patch } })
 }
+
+// The page has its own field: on phones the header search box is hidden.
+const text = ref('')
+watch(
+  q,
+  (v) => {
+    text.value = v
+  },
+  { immediate: true },
+)
+function submit() {
+  const v = text.value.trim()
+  if (v !== '') setQuery({ q: v, page: '1' })
+}
 </script>
 
 <template>
   <v-container>
+    <v-text-field
+      v-model="text"
+      :prepend-inner-icon="mdiMagnify"
+      :label="t('home.searchLabel')"
+      density="compact"
+      hide-details
+      autofocus
+      class="mb-2"
+      @keyup.enter="submit"
+    />
     <v-tabs
       :model-value="type"
       class="mb-2"

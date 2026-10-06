@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { mdiContentCopy, mdiDelete, mdiFileDelimited, mdiLink, mdiPrinter } from '@mdi/js'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { apiPath } from '@/api/client'
@@ -103,8 +103,18 @@ function adoptShared(mode: 'replace' | 'merge') {
   else cart.merge(s.items)
   void router.replace(links.to('/cart', {}, false))
 }
+// Only whole quantities >= 1 are applied: an emptied field while typing must not delete the line.
 function setQty(id: string, v: unknown) {
-  cart.setQty(id, Number(v))
+  const n = Number(v)
+  if (Number.isInteger(n) && n >= 1) cart.setQty(id, n)
+}
+const confirming = ref(false)
+function clearCart() {
+  cart.clear()
+  confirming.value = false
+}
+function removeMissing() {
+  for (const id of data.value?.missing ?? []) cart.remove(id)
 }
 </script>
 
@@ -139,7 +149,29 @@ function setQty(id: string, v: unknown) {
           t('cart.share')
         }}</v-btn>
       </template>
+      <v-btn
+        v-if="!shared && items.length > 0 && !confirming"
+        :prepend-icon="mdiDelete"
+        variant="text"
+        color="error"
+        class="no-print"
+        @click="confirming = true"
+        >{{ t('cart.clear') }}</v-btn
+      >
     </div>
+    <v-alert
+      v-if="confirming"
+      type="warning"
+      variant="tonal"
+      density="compact"
+      class="mb-2 no-print"
+    >
+      {{ t('cart.confirmClear') }}
+      <template #append>
+        <v-btn color="error" variant="text" @click="clearCart">{{ t('cart.confirm') }}</v-btn>
+        <v-btn variant="text" @click="confirming = false">{{ t('cart.cancel') }}</v-btn>
+      </template>
+    </v-alert>
     <v-alert
       v-if="shared && shared.invalid.length > 0"
       type="warning"
@@ -156,7 +188,12 @@ function setQty(id: string, v: unknown) {
       density="compact"
       class="mb-2"
     >
-      {{ t('cart.missing', { n: data.missing.length }) }}
+      {{ t('cart.missing', { n: data.missing.length }) }}: {{ data.missing.join(', ') }}
+      <template v-if="!shared" #append>
+        <v-btn variant="text" class="no-print" @click="removeMissing">{{
+          t('cart.removeMissing')
+        }}</v-btn>
+      </template>
     </v-alert>
     <v-alert v-if="items.length === 0" type="info" variant="tonal">{{ t('cart.empty') }}</v-alert>
     <v-progress-linear v-if="loading" indeterminate />

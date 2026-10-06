@@ -123,5 +123,9 @@ export const en = {
     vehicle: 'Vehicle',
     qty: 'Qty',
     clear: 'Empty cart',
+    confirmClear: 'Empty the cart?',
+    confirm: 'Empty',
+    cancel: 'Cancel',
+    removeMissing: 'Remove them',
   },
 }

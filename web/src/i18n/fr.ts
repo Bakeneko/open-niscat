@@ -125,5 +125,9 @@ export const fr: typeof en = {
     vehicle: 'Véhicule',
     qty: 'Qté',
     clear: 'Vider le panier',
+    confirmClear: 'Vider le panier ?',
+    confirm: 'Vider',
+    cancel: 'Annuler',
+    removeMissing: 'Les retirer',
   },
 }
