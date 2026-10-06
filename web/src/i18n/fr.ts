@@ -39,7 +39,7 @@ export const fr: typeof en = {
     vin: 'VIN',
     model: 'Code modèle',
     prodDate: 'Production',
-    vinCount: 'VIN avec ce code modèle',
+    vinCount: 'VINs avec ce code modèle',
     documents: 'Documents',
     groups: 'Index général',
     attributes: 'Caractéristiques',
