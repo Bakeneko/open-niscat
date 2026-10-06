@@ -49,6 +49,9 @@ func Load(args []string, baseDir string) (Config, error) {
 	if err := flags.Parse(args); err != nil {
 		return Config{}, fmt.Errorf("parse flags: %w", err)
 	}
+	if flags.NArg() > 0 {
+		return Config{}, fmt.Errorf("unexpected argument %q (use --data to choose the data directory)", flags.Arg(0))
+	}
 	set := map[string]bool{}
 	flags.Visit(func(f *flag.Flag) { set[f.Name] = true })
 

@@ -81,6 +81,7 @@ func TestErrors(t *testing.T) {
 		"empty addr":           {file: "addr = \"\"\n", want: "addr"},
 		"missing explicit":     {args: []string{"--config", filepath.Join(base, "nope.toml")}, want: "nope.toml"},
 		"bad toml":             {file: "addr = \n", want: "open-niscat.toml"},
+		"positional argument":  {args: []string{"./data", "--addr", "0.0.0.0:9000"}, want: "unexpected argument \"./data\""},
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {

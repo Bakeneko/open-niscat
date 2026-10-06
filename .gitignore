@@ -8,3 +8,6 @@
 /bin/
 /dist/
 *.exe
+
+# Any SQLite file outside the synthetic test fixtures (which are built at test time)
+*.db
