@@ -254,8 +254,9 @@ watch(
 }
 @media print {
   .viewer {
-    height: auto;
+    height: auto !important;
     min-height: 0;
+    overflow: visible;
   }
   .stage {
     position: static;

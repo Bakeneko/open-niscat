@@ -84,8 +84,9 @@ watch(data, (s) => {
   if (s === null) return
   history.push('section', `${s.etd} ${s.sec} — ${s.name}`, route.fullPath)
 })
-watch(selected, async (key) => {
-  if (key === null) return
+// Also runs when the data arrives, so a shared link with ?item= scrolls to its row.
+watch([selected, data], async ([key, s]) => {
+  if (key === null || s === null) return
   await nextTick()
   document
     .querySelector(`.parts-table tr[data-item="${CSS.escape(key)}"]`)
@@ -155,34 +156,34 @@ watch(selected, async (key) => {
           <v-tab value="drawing">{{ t('section.drawing') }}</v-tab>
           <v-tab value="info">{{ t('section.info') }}</v-tab>
         </v-tabs>
-        <div v-show="tab === 'drawing'">
+        <div v-show="tab === 'drawing'" class="print-show">
           <DrawingViewer
             :src="data.image"
             :hotspots="data.hotspots"
             :selected="selected"
             :titles="titles"
-            style="height: 70vh"
+            class="viewer-mobile"
             @select="select"
           />
         </div>
-        <div v-show="tab === 'info'">
-          <PartDetail :lines="selectedLines" class="my-2" @add="add" />
+        <div v-show="tab === 'info'" class="print-show">
+          <PartDetail :lines="selectedLines" class="my-2 no-print" @add="add" />
           <PartsTable :lines="data.lines" :selected="selected" @select="select" @add="add" />
         </div>
       </template>
       <v-row v-else dense>
-        <v-col cols="7">
+        <v-col cols="7" class="print-full">
           <DrawingViewer
             :src="data.image"
             :hotspots="data.hotspots"
             :selected="selected"
             :titles="titles"
-            style="height: calc(100vh - 150px)"
+            class="viewer-desktop"
             @select="select"
           />
         </v-col>
-        <v-col cols="5" class="section-panel">
-          <PartDetail :lines="selectedLines" class="mb-2" @add="add" />
+        <v-col cols="5" class="section-panel print-full">
+          <PartDetail :lines="selectedLines" class="mb-2 no-print" @add="add" />
           <PartsTable :lines="data.lines" :selected="selected" @select="select" @add="add" />
         </v-col>
       </v-row>
@@ -191,14 +192,30 @@ watch(selected, async (key) => {
 </template>
 
 <style scoped>
-.section-panel {
+.section-panel,
+.viewer-desktop {
   height: calc(100vh - 150px);
+}
+.section-panel {
   overflow-y: auto;
 }
+.viewer-mobile {
+  height: 70vh;
+}
+/* Printed plate: drawing at full width, then the table; mobile tabs print both panes. */
 @media print {
-  .section-panel {
+  .section-panel,
+  .viewer-desktop,
+  .viewer-mobile {
     height: auto;
     overflow: visible;
+  }
+  .print-full {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  .print-show {
+    display: block !important;
   }
 }
 </style>
