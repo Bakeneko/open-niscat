@@ -3,23 +3,40 @@
 
 DATA ?= ./data
 
-.PHONY: test lint test-go lint-go fmt-go run build build-go build-linux build-windows
+# Explicit Go packages: ./... would walk into web/node_modules, which ships stray .go files.
+GOPKGS = ./cmd/... ./internal/... ./web
+
+.PHONY: test lint test-go lint-go fmt-go web web-install lint-web test-web run build build-go build-linux build-windows
 
 ## test: run all tests
-test: test-go
+test: test-go test-web
 
 ## lint: run all linters (zero issues tolerated)
-lint: lint-go
+lint: lint-go lint-web
 
 test-go:
-	go test ./...
+	go test $(GOPKGS)
 
 lint-go:
-	golangci-lint run ./...
+	golangci-lint run $(GOPKGS)
 
 ## fmt-go: format Go code (gofumpt + goimports)
 fmt-go:
-	golangci-lint fmt ./...
+	golangci-lint fmt $(GOPKGS)
+
+## web-install: install frontend dependencies
+web-install:
+	npm --prefix web ci
+
+## web: build the frontend into web/dist (embedded by the Go build)
+web:
+	npm --prefix web run build
+
+lint-web:
+	npm --prefix web run lint
+
+test-web:
+	npm --prefix web run test
 
 ## run: serve $(DATA) on 127.0.0.1:8080 without opening a browser
 run:
@@ -28,7 +45,7 @@ run:
 GOBUILD = go build -trimpath -ldflags "-s -w"
 
 ## build: build the binaries for Linux and Windows (amd64) into dist/
-build: build-go
+build: web build-go
 
 build-go: build-linux build-windows
 

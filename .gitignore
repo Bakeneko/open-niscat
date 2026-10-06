@@ -12,3 +12,5 @@
 
 # Any SQLite file outside the synthetic test fixtures (which are built at test time)
 *.db
+/web/.eslintcache
+/web/coverage/
