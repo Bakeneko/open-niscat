@@ -12,7 +12,7 @@ import { useLang } from '@/composables/useLang'
 import { useLinks } from '@/composables/useLinks'
 import { useScope } from '@/composables/useScope'
 import { formatRange } from '@/lib/format'
-import { sectionMatchesCaption } from '@/lib/hotspots'
+import { groupHotspots, sectionMatchesCaption } from '@/lib/hotspots'
 import { scopeToQuery } from '@/lib/scope'
 
 const { t } = useI18n()
@@ -42,6 +42,9 @@ watch(
   },
 )
 const showAll = ref(false)
+const spots = computed(() =>
+  groupHotspots(data.value?.hotspots ?? [], data.value?.sections ?? [], showAll.value),
+)
 const sections = computed(() =>
   (data.value?.sections ?? []).filter(
     (s) =>
@@ -72,7 +75,9 @@ const titles = computed(() => {
         <v-col v-if="data.group.image" cols="12" md="7">
           <DrawingViewer
             :src="data.group.image"
-            :hotspots="data.hotspots"
+            :hotspots="spots.shown"
+            :muted="spots.muted"
+            labels
             :selected="selected"
             :titles="titles"
             :style="{ height: mdAndUp ? 'calc(100vh - 160px)' : '60vh' }"

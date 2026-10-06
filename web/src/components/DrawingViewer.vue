@@ -10,6 +10,10 @@ const props = defineProps<{
   hotspots: Hotspot[]
   selected: string | null
   titles?: Record<string, string>
+  /** Write captions over the drawing (group indexes: the printed numbers there are stale). */
+  labels?: boolean
+  /** Hotspot keys shown greyed out (e.g. sections not applicable to the vehicle). */
+  muted?: string[]
 }>()
 const emit = defineEmits<{ select: [key: string] }>()
 const { t } = useI18n()
@@ -186,13 +190,20 @@ watch(
         :key="i"
         type="button"
         class="hotspot"
-        :class="{ selected: h.key === selected }"
+        :class="{ selected: h.key === selected, labelled: labels, muted: muted?.includes(h.key) }"
         :style="spotStyle(h)"
         :data-key="h.key"
         :title="titles?.[h.key] ?? h.caption"
         :aria-label="h.caption"
         @click="onKeySpot($event, h.key)"
-      />
+      >
+        <span
+          v-if="labels"
+          class="caption"
+          :style="{ fontSize: `${String(Math.round(h.h * 0.7))}px` }"
+          >{{ h.caption }}</span
+        >
+      </button>
     </div>
     <div class="tools no-print">
       <v-btn :icon="mdiMagnifyPlus" size="small" :title="t('section.zoomIn')" @click="zoom(1.4)" />
@@ -240,6 +251,29 @@ watch(
 .hotspot:focus-visible {
   border-color: rgb(211, 47, 47);
   outline: none;
+}
+.hotspot.labelled {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: #fff;
+}
+.hotspot .caption {
+  color: rgb(211, 47, 47);
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+.hotspot.muted {
+  border-style: dashed;
+  border-color: rgba(120, 120, 120, 0.6);
+}
+.hotspot.muted .caption {
+  color: rgb(140, 140, 140);
+}
+.hotspot.selected .caption {
+  color: rgb(var(--v-theme-primary));
 }
 .hotspot.selected {
   border-color: rgb(var(--v-theme-primary));
