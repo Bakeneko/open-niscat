@@ -1,0 +1,46 @@
+export const en = {
+  app: { title: 'Open Niscat', edition: 'Data: {edition}', loading: 'Loading…', retry: 'Retry', notFound: 'Page not found' },
+  error: { not_found: 'Not found.', invalid: 'Invalid request.', internal: 'Server error.', network: 'The server cannot be reached.' },
+  nav: { home: 'Home', catalogs: 'Catalogues', cart: 'Cart', vehicle: 'Vehicle' },
+  home: {
+    vinLabel: 'VIN', vinHint: 'Full VIN, or its last 6+ characters', find: 'Identify',
+    browse: 'Browse the catalogues', history: 'Recently viewed', searchLabel: 'Search parts or sections',
+  },
+  scope: {
+    none: 'No vehicle', choose: 'Choose a vehicle', use: 'Use this vehicle', clear: 'Remove vehicle',
+    saved: 'Remembered vehicle', sheet: 'Vehicle sheet', fromLink: 'Vehicle from this link',
+  },
+  vin: { candidates: 'Matching VINs', notFound: 'No vehicle found for this VIN.' },
+  vehicle: {
+    vin: 'VIN', model: 'Model code', prodDate: 'Production', vinCount: 'VINs with this model code',
+    documents: 'Documents', groups: 'General index', attributes: 'Specifications', catalog: 'Catalogue',
+  },
+  catalogs: { title: 'Catalogues', period: 'Period', drive: 'Drive' },
+  models: { title: 'Model codes', filter: 'Filter', use: 'Use', vins: 'VINs', count: '{n} model codes' },
+  group: {
+    sections: 'Sections', showAll: 'Show non-applicable sections', notApplicable: 'Not applicable',
+    filtered: 'Sections for {caption}', clearFilter: 'All sections',
+  },
+  section: {
+    notApplicable: 'This section does not apply to the current vehicle.', prev: 'Previous', next: 'Next',
+    print: 'Print', drawing: 'Exploded view', info: 'Info', select: 'Select an item on the drawing or in the list.',
+    fit: 'Fit', zoomIn: 'Zoom in', zoomOut: 'Zoom out', group: 'Group',
+  },
+  part: {
+    mark: 'Mark', item: 'Item', reference: 'Part number', description: 'Description', qty: 'Qty', period: 'Period',
+    alternative: 'Alternative part number', latest: 'Latest known reference', ica: 'ICA', app: 'Applicable to model',
+    spec: 'Specification', pnc: 'PNC', kd: 'K.D.', outOfPeriod: 'Outside the vehicle production date',
+    occurrences: 'Used in', replaces: 'Replaces', replacedBy: 'Replaced by', series: 'Catalogue', section: 'Section',
+  },
+  search: {
+    placeholder: 'Search…', parts: 'Parts', sections: 'Sections', results: '{n} results', truncated: 'More than {n} results: refine the search.',
+    none: 'No results.', scoped: 'Limited to the current vehicle',
+  },
+  cart: {
+    title: 'Cart', empty: 'The cart is empty.', add: 'Add to cart', added: 'Added to cart', remove: 'Remove',
+    copy: 'Copy for a spreadsheet', copied: 'Copied — paste it in a spreadsheet', csv: 'Export CSV', print: 'Print / PDF',
+    share: 'Copy share link', linkCopied: 'Link copied', shared: 'Shared cart (read-only)', replace: 'Replace my cart',
+    merge: 'Add to my cart', missing: '{n} line(s) no longer found', invalid: '{n} invalid item(s) ignored', open: 'Open cart',
+    section: 'Section', vehicle: 'Vehicle', qty: 'Qty', clear: 'Empty cart',
+  },
+}
