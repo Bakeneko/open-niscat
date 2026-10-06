@@ -1,0 +1,59 @@
+version: "2"
+
+run:
+  tests: true
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - errorlint
+    - exhaustive
+    - gocritic
+    - gosec
+    - misspell
+    - noctx
+    - nolintlint
+    - prealloc
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - unparam
+    - wrapcheck
+  settings:
+    gocritic:
+      enabled-tags: [diagnostic, style, performance]
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+    revive:
+      rules:
+        - name: exported
+        - name: package-comments
+        - name: var-naming
+        - name: indent-error-flow
+        - name: error-strings
+        - name: error-naming
+        - name: receiver-naming
+        - name: unused-parameter
+        - name: unexported-return
+  exclusions:
+    generated: lax
+    presets:
+      # Unchecked Close/Flush/print errors (e.g. `defer rows.Close()` on read-only queries).
+      - std-error-handling
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+  settings:
+    gofumpt:
+      # The module path has no dot; without this gofumpt treats "open-niscat/..." as a standard library import.
+      module-path: open-niscat
+    goimports:
+      local-prefixes: [open-niscat]
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

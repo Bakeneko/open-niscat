@@ -1,0 +1,10 @@
+/data/
+
+# Front
+/web/node_modules/
+/web/dist/
+
+# Build output
+/bin/
+/dist/
+*.exe
