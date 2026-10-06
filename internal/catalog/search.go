@@ -29,12 +29,13 @@ type SearchKind string
 const (
 	SearchParts    SearchKind = "parts"
 	SearchSections SearchKind = "sections"
+	SearchVINs     SearchKind = "vins"
 )
 
 // ParseSearchKind validates a search kind; "" means parts.
 func ParseSearchKind(s string) (SearchKind, error) {
 	switch k := SearchKind(s); k {
-	case SearchParts, SearchSections:
+	case SearchParts, SearchSections, SearchVINs:
 		return k, nil
 	case "":
 		return SearchParts, nil
@@ -65,6 +66,7 @@ type SearchResult struct {
 	Truncated bool         `json:"truncated"`
 	Parts     []LineRef    `json:"parts"`
 	Sections  []SectionHit `json:"sections"`
+	VINs      []VINMatch   `json:"vins"`
 }
 
 // LinesResult resolves cart line ids; unknown or malformed ids are listed in Missing.
@@ -104,8 +106,16 @@ func (s *Store) Search(ctx context.Context, q SearchQuery, sc *Scope, lang Lang)
 	if err != nil {
 		return SearchResult{}, err
 	}
-	res := SearchResult{Parts: []LineRef{}, Sections: []SectionHit{}}
+	res := SearchResult{Parts: []LineRef{}, Sections: []SectionHit{}, VINs: []VINMatch{}}
 	switch q.Kind {
+	case SearchVINs:
+		hits, err := s.searchVINs(ctx, q.Q)
+		if err != nil {
+			return SearchResult{}, err
+		}
+		hits, res.Truncated = capped(hits)
+		res.Total = len(hits)
+		res.VINs = page(hits, offset, limit)
 	case SearchSections:
 		hits, err := s.searchSections(ctx, q.Q, sc, applicable, lang)
 		if err != nil {
@@ -124,6 +134,19 @@ func (s *Store) Search(ctx context.Context, q SearchQuery, sc *Scope, lang Lang)
 		res.Parts = page(hits, offset, limit)
 	}
 	return res, nil
+}
+
+// searchVINs finds vehicles whose VIN ends with q; input shorter than minVINTail or made of several words finds
+// nothing. VINs are vehicles, so the scope does not apply.
+func (s *Store) searchVINs(ctx context.Context, q string) ([]VINMatch, error) {
+	if len(strings.Fields(q)) != 1 {
+		return []VINMatch{}, nil
+	}
+	tail := NormalizeVIN(q)
+	if len(tail) < minVINTail || strings.ContainsAny(tail, "*?[]") {
+		return []VINMatch{}, nil
+	}
+	return s.vinsEndingWith(ctx, tail, maxMatches+1)
 }
 
 // capped trims a result read with LIMIT maxMatches+1 and reports whether it was cut.

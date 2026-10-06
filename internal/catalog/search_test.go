@@ -8,7 +8,7 @@ import (
 	"open-niscat/internal/catalog"
 )
 
-func partIDs(r catalog.SearchResult) []string {
+func partIDs(r *catalog.SearchResult) []string {
 	ids := make([]string, 0, len(r.Parts))
 	for i := range r.Parts {
 		ids = append(ids, r.Parts[i].ID)
@@ -22,7 +22,7 @@ func TestSearchPartsByText(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if r.Total != 2 || !reflect.DeepEqual(partIDs(r), []string{"AA3", "AA6"}) || r.Parts[0].Sec != "230A" {
+	if r.Total != 2 || !reflect.DeepEqual(partIDs(&r), []string{"AA3", "AA6"}) || r.Parts[0].Sec != "230A" {
 		t.Fatalf("result = %+v", r)
 	}
 	// Prefix match and English fallback for the AB series.
@@ -49,7 +49,7 @@ func TestSearchPartsScoped(t *testing.T) {
 		t.Fatal(err)
 	}
 	r, err := s.Search(ctx, catalog.SearchQuery{Q: "palier", Kind: catalog.SearchParts}, sc, catalog.LangFR)
-	if err != nil || !reflect.DeepEqual(partIDs(r), []string{"AA3"}) { // AA6 is in 231, not applicable
+	if err != nil || !reflect.DeepEqual(partIDs(&r), []string{"AA3"}) { // AA6 is in 231, not applicable
 		t.Fatalf("scoped = %+v, %v", r, err)
 	}
 }
@@ -57,7 +57,7 @@ func TestSearchPartsScoped(t *testing.T) {
 func TestSearchPagination(t *testing.T) {
 	s := openFixture(t)
 	r, err := s.Search(ctx, catalog.SearchQuery{Q: "palier", Kind: catalog.SearchParts, Limit: 1, Offset: 1}, nil, catalog.LangFR)
-	if err != nil || r.Total != 2 || !reflect.DeepEqual(partIDs(r), []string{"AA6"}) {
+	if err != nil || r.Total != 2 || !reflect.DeepEqual(partIDs(&r), []string{"AA6"}) {
 		t.Fatalf("page = %+v, %v", r, err)
 	}
 }
@@ -106,5 +106,22 @@ func TestLines(t *testing.T) {
 	}
 	if _, err := s.Lines(ctx, make([]string, catalog.MaxLines+1), catalog.LangEN); !errors.Is(err, catalog.ErrInvalid) {
 		t.Fatalf("too many ids: %v", err)
+	}
+}
+
+func TestSearchVINs(t *testing.T) {
+	s := openFixture(t)
+	r, err := s.Search(ctx, catalog.SearchQuery{Q: " 0990494", Kind: catalog.SearchVINs}, nil, catalog.LangFR)
+	if err != nil || r.Total != 1 || len(r.VINs) != 1 || r.VINs[0].VIN != "VSKBEC220U0990494" || r.VINs[0].Cat != "AA-G01" {
+		t.Fatalf("VIN tail = %+v, %v", r, err)
+	}
+	for _, q := range []string{"0494", "palier joint", ""} {
+		r, err := s.Search(ctx, catalog.SearchQuery{Q: q, Kind: catalog.SearchVINs}, nil, catalog.LangFR)
+		if err != nil || r.Total != 0 || r.VINs == nil || len(r.VINs) != 0 {
+			t.Errorf("VIN search %q = %+v, %v", q, r, err)
+		}
+	}
+	if k, err := catalog.ParseSearchKind("vins"); err != nil || k != catalog.SearchVINs {
+		t.Errorf("ParseSearchKind(vins) = %v, %v", k, err)
 	}
 }

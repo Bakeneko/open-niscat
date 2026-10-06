@@ -11,6 +11,9 @@ import (
 // minVINTail is the shortest input accepted for a search on the end of the VIN.
 const minVINTail = 6
 
+// maxCandidates caps the candidates of an end-of-VIN identification.
+const maxCandidates = 20
+
 // Info is one catalogue entry (niscat.mdb SERIES).
 type Info struct {
 	Cat         string   `json:"cat"`
@@ -335,7 +338,7 @@ func (s *Store) IdentifyVIN(ctx context.Context, input string, lang Lang) (VINRe
 	if len(tail) < minVINTail {
 		return VINResult{}, err
 	}
-	candidates, err := s.vinsEndingWith(ctx, tail)
+	candidates, err := s.vinsEndingWith(ctx, tail, maxCandidates)
 	if err != nil {
 		return VINResult{}, err
 	}
@@ -345,15 +348,15 @@ func (s *Store) IdentifyVIN(ctx context.Context, input string, lang Lang) (VINRe
 	return VINResult{Candidates: candidates}, nil
 }
 
-func (s *Store) vinsEndingWith(ctx context.Context, tail string) ([]VINMatch, error) {
+func (s *Store) vinsEndingWith(ctx context.Context, tail string, limit int) ([]VINMatch, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT DISTINCT v.vin, v.codenis, v.etd, v.prodata,
 		(SELECT m.grupo FROM modelnis m WHERE m.etd = v.etd AND m.codenis = v.codenis LIMIT 1)
-		FROM vin v WHERE v.vin_rev GLOB ? ORDER BY v.vin LIMIT 20`, reverse(tail)+"*")
+		FROM vin v WHERE v.vin_rev GLOB ? ORDER BY v.vin LIMIT ?`, reverse(tail)+"*", limit)
 	if err != nil {
 		return nil, fmt.Errorf("search VIN tail: %w", err)
 	}
 	defer rows.Close()
-	var out []VINMatch
+	out := []VINMatch{}
 	for rows.Next() {
 		var f [5]sql.NullString
 		if err := rows.Scan(&f[0], &f[1], &f[2], &f[3], &f[4]); err != nil {
