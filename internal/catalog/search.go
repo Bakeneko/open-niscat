@@ -53,11 +53,12 @@ type SearchQuery struct {
 
 // SectionHit is a section search result.
 type SectionHit struct {
-	Etd   string `json:"etd"`
-	Sec   string `json:"sec"`
-	Group Group  `json:"group"`
-	Name  string `json:"name"`
-	Notes string `json:"notes"`
+	Etd    string `json:"etd"`
+	Sec    string `json:"sec"`
+	Group  Group  `json:"group"`
+	Name   string `json:"name"`
+	NameEN string `json:"nameEn,omitempty"`
+	Notes  string `json:"notes"`
 }
 
 // SearchResult is one page of results; Total counts all matches (capped at maxMatches).
@@ -255,7 +256,7 @@ func (s *Store) searchSections(ctx context.Context, q string, sc *Scope, applica
 	scopeConds, scopeArgs := scopeFilter(sc, applicable, "s.etd", "s.numsec", false)
 	where = append(where, scopeConds...)
 	args = append(args, scopeArgs...)
-	query := "SELECT s.etd, s.numsec, s.codigrup, s.nomsec, s.notas FROM section s WHERE " + strings.Join(where, " AND ") + //nolint:gosec // fixed fragments and placeholders only
+	query := "SELECT s.etd, s.numsec, s.codigrup, s.nomsec, s.notas, " + englishName + " FROM section s WHERE " + strings.Join(where, " AND ") + //nolint:gosec // fixed fragments and placeholders only
 		" ORDER BY s.etd, s.rowid LIMIT " + strconv.Itoa(maxMatches+1)
 	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -264,11 +265,14 @@ func (s *Store) searchSections(ctx context.Context, q string, sc *Scope, applica
 	defer rows.Close()
 	out := []SectionHit{}
 	for rows.Next() {
-		var f [5]sql.NullString
-		if err := rows.Scan(&f[0], &f[1], &f[2], &f[3], &f[4]); err != nil {
+		var f [6]sql.NullString
+		if err := rows.Scan(&f[0], &f[1], &f[2], &f[3], &f[4], &f[5]); err != nil {
 			return nil, fmt.Errorf("search sections: %w", err)
 		}
-		out = append(out, SectionHit{Etd: str(f[0]), Sec: str(f[1]), Group: Group{Code: str(f[2])}, Name: str(f[3]), Notes: str(f[4])})
+		out = append(out, SectionHit{
+			Etd: str(f[0]), Sec: str(f[1]), Group: Group{Code: str(f[2])}, Name: str(f[3]), NameEN: nameEN(str(f[3]), f[5]),
+			Notes: str(f[4]),
+		})
 	}
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("search sections: %w", err)

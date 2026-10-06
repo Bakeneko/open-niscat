@@ -113,3 +113,23 @@ func TestSectionNotFound(t *testing.T) {
 		t.Fatalf("err = %v", err)
 	}
 }
+
+func TestSectionNameEN(t *testing.T) {
+	s := openFixture(t)
+	fr, err := s.Section(ctx, "AA", "230A", nil, catalog.LangFR)
+	if err != nil || fr.Name != "FIXATION ALTERNATEUR" || fr.NameEN != "ALTERNATOR FITTING" {
+		t.Fatalf("fr section = %q / %q, %v", fr.Name, fr.NameEN, err)
+	}
+	en, err := s.Section(ctx, "AA", "230A", nil, catalog.LangEN)
+	if err != nil || en.NameEN != "" {
+		t.Fatalf("en section must not repeat its name: %q, %v", en.NameEN, err)
+	}
+	r, err := s.Search(ctx, catalog.SearchQuery{Q: "fixation", Kind: catalog.SearchSections}, nil, catalog.LangFR)
+	if err != nil || len(r.Sections) == 0 || r.Sections[0].NameEN != "ALTERNATOR FITTING" {
+		t.Fatalf("search hit = %+v, %v", r.Sections, err)
+	}
+	g, err := s.GroupDetail(ctx, "AA", "G01", "B", nil, catalog.LangFR)
+	if err != nil || len(g.Sections) == 0 || g.Sections[0].NameEN != "ALTERNATOR FITTING" {
+		t.Fatalf("group sections = %+v, %v", g.Sections, err)
+	}
+}

@@ -29,6 +29,7 @@ type Hotspot struct {
 type SectionSummary struct {
 	Sec        string  `json:"sec"`
 	Name       string  `json:"name"`
+	NameEN     string  `json:"nameEn,omitempty"`
 	Notes      string  `json:"notes"`
 	From       *string `json:"from"`
 	To         *string `json:"to"`
@@ -170,7 +171,7 @@ func (s *Store) hotspots(ctx context.Context, etd, kind, image string) ([]Hotspo
 
 // groupSections lists the sections of a group in NISCAT order; with grupo, only sections of that period.
 func (s *Store) groupSections(ctx context.Context, etd, grupo, code string, lang Lang) ([]SectionSummary, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT s.numsec, s.nomsec, s.notas, s.desde, s.hasta FROM section s
+	rows, err := s.db.QueryContext(ctx, `SELECT s.numsec, s.nomsec, s.notas, s.desde, s.hasta, `+englishName+` FROM section s
 		WHERE s.etd = ? AND s.lang = ? AND s.codigrup = ?
 		  AND (? = '' OR EXISTS (SELECT 1 FROM infosec i
 		        WHERE i.variant = 'F' AND i.etd = s.etd AND i.grupo = ? AND i.secc = s.numsec))
@@ -181,11 +182,14 @@ func (s *Store) groupSections(ctx context.Context, etd, grupo, code string, lang
 	defer rows.Close()
 	out := []SectionSummary{}
 	for rows.Next() {
-		var f [5]sql.NullString
-		if err := rows.Scan(&f[0], &f[1], &f[2], &f[3], &f[4]); err != nil {
+		var f [6]sql.NullString
+		if err := rows.Scan(&f[0], &f[1], &f[2], &f[3], &f[4], &f[5]); err != nil {
 			return nil, fmt.Errorf("group sections: %w", err)
 		}
-		out = append(out, SectionSummary{Sec: str(f[0]), Name: str(f[1]), Notes: str(f[2]), From: yearMonthOf(str(f[3])), To: yearMonthOf(str(f[4]))})
+		out = append(out, SectionSummary{
+			Sec: str(f[0]), Name: str(f[1]), NameEN: nameEN(str(f[1]), f[5]), Notes: str(f[2]),
+			From: yearMonthOf(str(f[3])), To: yearMonthOf(str(f[4])),
+		})
 	}
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("group sections: %w", err)

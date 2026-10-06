@@ -50,6 +50,7 @@ type Section struct {
 	Plate      string    `json:"plate"`
 	Group      Group     `json:"group"`
 	Name       string    `json:"name"`
+	NameEN     string    `json:"nameEn,omitempty"`
 	Notes      string    `json:"notes"`
 	From       *string   `json:"from"`
 	To         *string   `json:"to"`
@@ -98,10 +99,11 @@ func scanLine(rows *sql.Rows) (LineRef, error) {
 // absent from the scope's period): not applicable, no period checks, unfiltered neighbours.
 func (s *Store) Section(ctx context.Context, etd, sec string, sc *Scope, lang Lang) (Section, error) {
 	etd, sec = strings.ToUpper(etd), strings.ToUpper(sec)
-	var code, name, notes, from, to sql.NullString
+	var code, name, notes, from, to, en sql.NullString
 	err := s.db.QueryRowContext(ctx,
-		"SELECT codigrup, nomsec, notas, desde, hasta FROM section WHERE etd = ? AND lang = ? AND numsec = ?",
-		etd, s.dataLang(etd, lang), sec).Scan(&code, &name, &notes, &from, &to)
+		"SELECT s.codigrup, s.nomsec, s.notas, s.desde, s.hasta, "+englishName+
+			" FROM section s WHERE s.etd = ? AND s.lang = ? AND s.numsec = ?",
+		etd, s.dataLang(etd, lang), sec).Scan(&code, &name, &notes, &from, &to, &en)
 	if errors.Is(err, sql.ErrNoRows) {
 		return Section{}, fmt.Errorf("%w: section %s/%s", ErrNotFound, etd, sec)
 	}
@@ -109,7 +111,7 @@ func (s *Store) Section(ctx context.Context, etd, sec string, sc *Scope, lang La
 		return Section{}, fmt.Errorf("look up section: %w", err)
 	}
 	out := Section{
-		Etd: etd, Sec: sec, Plate: etd + sec, Name: str(name), Notes: str(notes), From: yearMonthOf(str(from)), To: yearMonthOf(str(to)),
+		Etd: etd, Sec: sec, Plate: etd + sec, Name: str(name), NameEN: nameEN(str(name), en), Notes: str(notes), From: yearMonthOf(str(from)), To: yearMonthOf(str(to)),
 		Image: s.fileURL("img", etd, etd+sec+".png"),
 	}
 	if out.Group, err = s.group(ctx, etd, str(code), lang); err != nil {
