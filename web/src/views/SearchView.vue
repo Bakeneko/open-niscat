@@ -2,6 +2,7 @@
 import { mdiMagnify } from '@mdi/js'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useDisplay } from 'vuetify'
 import { useRoute, useRouter, type LocationQuery } from 'vue-router'
 import { apiPath } from '@/api/client'
 import type { SearchResult } from '@/api/types'
@@ -22,6 +23,7 @@ const router = useRouter()
 const lang = useLang()
 const links = useLinks()
 const { current } = useScope()
+const { xs } = useDisplay()
 
 const q = computed(() => (typeof route.query.q === 'string' ? route.query.q : ''))
 const page = computed(() => Math.max(1, Number(route.query.page) || 1))
@@ -84,6 +86,11 @@ watch(
   },
   { immediate: true },
 )
+// A new page starts from its first results.
+function setPage(n: number) {
+  setQuery({ page: String(n) })
+  window.scrollTo({ top: 0 })
+}
 // Only a user's choice is written to the URL: v-tabs selects its first tab by itself while results load.
 function pickTab(v: unknown) {
   if (type.value !== null && isSearchTab(v) && v !== type.value) setQuery({ type: v, page: '1' })
@@ -135,7 +142,19 @@ function setAll(v: boolean | null) {
     <v-progress-linear v-if="loading" indeterminate />
     <ErrorAlert :error="error" @retry="reload" />
     <template v-if="data">
-      <div class="text-caption mb-2">{{ t('search.results', { n: data.total }) }}</div>
+      <!-- One results bar, kept under the header while scrolling: count and pages. -->
+      <div class="results-bar d-flex align-center flex-wrap ga-2 mb-2">
+        <span class="text-caption">{{ t('search.results', { n: data.total }) }}</span>
+        <v-spacer />
+        <v-pagination
+          v-if="pages > 1"
+          :model-value="page"
+          :length="pages"
+          :total-visible="xs ? 3 : 7"
+          density="compact"
+          @update:model-value="setPage"
+        />
+      </div>
       <v-alert
         v-if="data.truncated"
         type="warning"
@@ -188,13 +207,16 @@ function setAll(v: boolean | null) {
           </template>
         </v-list-item>
       </v-list>
-      <v-pagination
-        v-if="pages > 1"
-        :model-value="page"
-        :length="pages"
-        :total-visible="7"
-        @update:model-value="(n) => setQuery({ page: String(n) })"
-      />
     </template>
   </v-container>
 </template>
+
+<style scoped>
+.results-bar {
+  position: sticky;
+  top: var(--v-layout-top, 0px);
+  z-index: 2;
+  min-height: 40px;
+  background: rgb(var(--v-theme-background));
+}
+</style>
