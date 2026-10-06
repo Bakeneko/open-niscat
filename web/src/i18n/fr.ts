@@ -21,7 +21,7 @@ export const fr: typeof en = {
     find: 'Identifier',
     browse: 'Parcourir les catalogues',
     history: 'Consultés récemment',
-    searchLabel: 'Rechercher des pièces ou des sections',
+    searchLabel: 'Rechercher des pièces, des sections ou des VIN',
   },
   lang: { label: 'Langue' },
   scope: {
@@ -101,6 +101,8 @@ export const fr: typeof en = {
     placeholder: 'Rechercher…',
     parts: 'Pièces',
     sections: 'Sections',
+    vins: 'VINs',
+    allVehicles: 'Tous les véhicules',
     results: '{n} résultats',
     truncated: 'Plus de {n} résultats : affinez la recherche.',
     none: 'Aucun résultat.',

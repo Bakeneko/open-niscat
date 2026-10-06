@@ -141,6 +141,7 @@ export interface SearchResult {
   truncated: boolean
   parts: LineRef[]
   sections: SectionHit[]
+  vins: VinMatch[]
 }
 export interface PartInfo {
   key: string

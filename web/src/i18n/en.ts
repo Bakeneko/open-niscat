@@ -19,7 +19,7 @@ export const en = {
     find: 'Identify',
     browse: 'Browse the catalogues',
     history: 'Recently viewed',
-    searchLabel: 'Search parts or sections',
+    searchLabel: 'Search parts, sections or VINs',
   },
   lang: { label: 'Language' },
   scope: {
@@ -99,6 +99,8 @@ export const en = {
     placeholder: 'Search…',
     parts: 'Parts',
     sections: 'Sections',
+    vins: 'VINs',
+    allVehicles: 'All vehicles',
     results: '{n} results',
     truncated: 'More than {n} results: refine the search.',
     none: 'No results.',
