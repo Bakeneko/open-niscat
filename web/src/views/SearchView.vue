@@ -5,13 +5,13 @@ import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
 import { useRoute, useRouter, type LocationQuery } from 'vue-router'
 import { apiPath } from '@/api/client'
-import type { SearchResult } from '@/api/types'
+import type { LineRef, SearchResult } from '@/api/types'
 import ErrorAlert from '@/components/ErrorAlert.vue'
 import { useFetch, type Fetched } from '@/composables/useFetch'
 import { useLang } from '@/composables/useLang'
 import { useLinks } from '@/composables/useLinks'
 import { useScope } from '@/composables/useScope'
-import { formatRange, formatYearMonth } from '@/lib/format'
+import { formatRange, formatYearMonth, readable } from '@/lib/format'
 import { refPath } from '@/lib/refs'
 import { scopeToQuery } from '@/lib/scope'
 import { defaultTab, isSearchTab, SEARCH_TABS, type SearchTab } from '@/lib/search'
@@ -86,6 +86,9 @@ watch(
   },
   { immediate: true },
 )
+function sectionLink(p: LineRef) {
+  return links.to(`/section/${p.etd}/${p.sec}`, { item: p.itemKey })
+}
 // A new page starts from its first results.
 function setPage(n: number) {
   setQuery({ page: String(n) })
@@ -178,20 +181,23 @@ function setAll(v: boolean | null) {
         />
       </v-list>
       <v-list v-else-if="type === 'parts'" density="compact" lines="two">
-        <v-list-item
-          v-for="p in data.parts"
-          :key="p.id"
-          :to="links.to(`/section/${p.etd}/${p.sec}`, { item: p.itemKey })"
-          :title="`${p.partNo} — ${p.description}`"
-          :subtitle="`${p.etd} ${p.sec} · ${t('part.item')} ${p.item || p.itemKey} · ${formatRange(p.from, p.to)}`"
-        >
-          <template #append>
+        <!-- Like the plate table and the cart: the part number opens the part page, the rest of the row the
+             plate with the item selected. The plate link is stretched over the whole row (a real link, so
+             Ctrl/middle-click open a tab) and the part number sits above it: no link inside a link. -->
+        <v-list-item v-for="p in data.parts" :key="p.id" class="part-hit">
+          <template #title>
             <RouterLink
               :to="links.to(refPath(p.partNo), {}, false)"
-              class="text-caption"
-              @click.stop
-              >{{ t('part.occurrences') }}</RouterLink
+              class="font-weight-bold part-no"
+              >{{ p.partNo }}</RouterLink
             >
+            — {{ readable(p.description) }}
+          </template>
+          <template #subtitle>
+            <RouterLink :to="sectionLink(p)" class="plate-link"
+              >{{ p.etd }} {{ p.sec }} · {{ t('part.item') }} {{ p.item || p.itemKey }}</RouterLink
+            >
+            <template v-if="p.from || p.to"> · {{ formatRange(p.from, p.to) }}</template>
           </template>
         </v-list-item>
       </v-list>
@@ -212,6 +218,33 @@ function setAll(v: boolean | null) {
 </template>
 
 <style scoped>
+.plate-link {
+  color: inherit;
+  text-decoration: none;
+}
+.plate-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.part-hit {
+  position: relative;
+}
+/* The subtitle clips its overflow, which would also clip the stretched link. */
+.part-hit :deep(.v-list-item-subtitle) {
+  overflow: visible;
+  -webkit-line-clamp: unset;
+}
+.part-hit:hover {
+  background: rgba(var(--v-theme-on-surface), 0.04);
+}
+.part-hit:hover .plate-link {
+  text-decoration: underline;
+}
+.part-no {
+  position: relative;
+  z-index: 1;
+}
 .results-bar {
   position: sticky;
   top: var(--v-layout-top, 0px);
