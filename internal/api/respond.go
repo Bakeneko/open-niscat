@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log/slog"
@@ -24,6 +25,9 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 }
 
 func writeError(w http.ResponseWriter, err error) {
+	if errors.Is(err, context.Canceled) {
+		return // the client went away (e.g. type-ahead search); nothing to report
+	}
 	switch {
 	case errors.Is(err, catalog.ErrNotFound):
 		writeJSON(w, http.StatusNotFound, apiError{Error: "not_found", Message: err.Error()})

@@ -3,6 +3,7 @@ package api_test
 import (
 	"context"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -146,5 +147,43 @@ func TestSPAWithoutBuiltFrontend(t *testing.T) {
 	h := api.New(store, fstest.MapFS{".gitkeep": {}}, catalog.LangEN)
 	if rec := get(t, h, "/"); rec.Code != http.StatusServiceUnavailable {
 		t.Fatalf("status %d", rec.Code)
+	}
+}
+
+func TestMethodNotAllowedIsJSON(t *testing.T) {
+	h := newServer(t)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/catalogs", http.NoBody))
+	if rec.Code != http.StatusMethodNotAllowed || decode(t, rec)["error"] != "method_not_allowed" || rec.Header().Get("Allow") != "GET, HEAD" {
+		t.Fatalf("POST /api/catalogs = %d %q allow=%q", rec.Code, rec.Body.String(), rec.Header().Get("Allow"))
+	}
+}
+
+func TestMissingAssetIs404(t *testing.T) {
+	h := newServer(t)
+	if rec := get(t, h, "/assets/old-1234.js"); rec.Code != http.StatusNotFound {
+		t.Fatalf("missing asset = %d %q", rec.Code, rec.Body.String())
+	}
+}
+
+func TestGroupDetailUnknownCatalog(t *testing.T) {
+	h := newServer(t)
+	if rec := get(t, h, "/api/catalogs/AA-G99/groups/B"); rec.Code != http.StatusNotFound {
+		t.Fatalf("unknown catalog = %d", rec.Code)
+	}
+}
+
+func TestCancelledRequestIsNotLogged(t *testing.T) {
+	h := newServer(t)
+	var logs strings.Builder
+	prev := slog.Default()
+	slog.SetDefault(slog.New(slog.NewTextHandler(&logs, nil)))
+	t.Cleanup(func() { slog.SetDefault(prev) })
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/search?q=palier", http.NoBody))
+	if logs.Len() != 0 {
+		t.Fatalf("cancelled request logged: %s", logs.String())
 	}
 }

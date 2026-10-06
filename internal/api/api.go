@@ -42,7 +42,19 @@ func New(store *catalog.Store, web fs.FS, defaultLang catalog.Lang) http.Handler
 	}))
 	mux.Handle("GET /files/", http.StripPrefix("/files", s.files()))
 	mux.HandleFunc("GET /", s.spa)
-	return noIndex(mux)
+	return noIndex(apiMethods(mux))
+}
+
+// apiMethods answers non-GET API requests with a JSON 405 (ServeMux would answer text/plain).
+func apiMethods(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/api/") && r.Method != http.MethodGet && r.Method != http.MethodHead {
+			w.Header().Set("Allow", "GET, HEAD")
+			writeJSON(w, http.StatusMethodNotAllowed, apiError{Error: "method_not_allowed", Message: "only GET is supported"})
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func noIndex(next http.Handler) http.Handler {
@@ -167,6 +179,9 @@ func (s *server) groupDetail(r *http.Request) (any, error) {
 	}
 	etd, grupo, err := catalog.ParseCat(r.PathValue("cat"))
 	if err != nil {
+		return nil, fmt.Errorf("group: %w", err)
+	}
+	if _, err := s.store.Catalog(r.Context(), etd, grupo); err != nil {
 		return nil, fmt.Errorf("group: %w", err)
 	}
 	d, err := s.store.GroupDetail(r.Context(), etd, grupo, strings.ToUpper(r.PathValue("group")), sc, l)
@@ -296,6 +311,10 @@ func (s *server) spa(w http.ResponseWriter, r *http.Request) {
 			http.ServeFileFS(w, r, s.web, name)
 			return
 		}
+	}
+	if strings.HasPrefix(name, "assets/") {
+		http.NotFound(w, r) // a stale hashed asset must not receive the HTML page
+		return
 	}
 	index, err := fs.ReadFile(s.web, "index.html")
 	if err != nil {
