@@ -41,11 +41,17 @@ const stageStyle = computed(() => ({
   width: `${String(natural.value.w)}px`,
   height: `${String(natural.value.h)}px`,
 }))
-const spotStyle = (h: Hotspot) => ({
-  left: `${String(h.x)}px`,
-  top: `${String(h.y)}px`,
-  width: `${String(h.w)}px`,
-  height: `${String(h.h)}px`,
+// Hotspots are placed in percent of the drawing and captions sized in cqw (the stage is a size container):
+// identical on screen, and they follow the image when printing resizes it to the page.
+const pct = (v: number, of: number) => `${String((v / of) * 100)}%`
+const spotStyle = (h: Hotspot) => {
+  const { w, h: ih } = natural.value
+  return w === 0 || ih === 0
+    ? { display: 'none' }
+    : { left: pct(h.x, w), top: pct(h.y, ih), width: pct(h.w, w), height: pct(h.h, ih) }
+}
+const captionStyle = (h: Hotspot) => ({
+  fontSize: natural.value.w === 0 ? '0' : `${String(((h.h * 0.6) / natural.value.w) * 100)}cqw`,
 })
 
 function fit() {
@@ -229,12 +235,7 @@ watch(
         @pointerleave="hideTip"
         @click="onKeySpot($event, h.key)"
       >
-        <span
-          v-if="labels"
-          class="caption"
-          :style="{ fontSize: `${String(Math.round(h.h * 0.6))}px` }"
-          >{{ h.caption }}</span
-        >
+        <span v-if="labels" class="caption" :style="captionStyle(h)">{{ h.caption }}</span>
       </button>
     </div>
     <div v-if="tip" class="tip" :style="tipStyle(tip)">{{ tip.text }}</div>
@@ -267,6 +268,7 @@ watch(
   left: 0;
   top: 0;
   transform-origin: 0 0;
+  container-type: inline-size;
 }
 .stage img {
   display: block;
@@ -362,7 +364,7 @@ watch(
     overflow: visible;
   }
   .stage {
-    position: static;
+    position: relative;
     transform: none !important;
     width: 100% !important;
     height: auto !important;
@@ -370,8 +372,18 @@ watch(
   .stage img {
     height: auto;
   }
-  .hotspot {
+  /* Captions are printed (they replace stale printed numbers); bare zones and hover/selection marks are not. */
+  .hotspot:not(.labelled),
+  .tip {
     display: none;
+  }
+  .hotspot.labelled {
+    border-color: transparent !important;
+  }
+  .hotspot .caption {
+    box-shadow: none !important;
+    outline: none !important;
+    color: rgb(211, 47, 47) !important;
   }
 }
 </style>
