@@ -8,22 +8,22 @@ export function useCart() {
   return {
     items,
     count: computed(() => items.value.length),
-    add(id: string, qty = 1, scope: Scope | null = null) {
+    add: (id: string, qty = 1, scope: Scope | null = null) => {
       items.value = addItem(items.value, id, qty, scope ?? undefined)
     },
-    setQty(id: string, qty: number) {
+    setQty: (id: string, qty: number) => {
       items.value = setQty(items.value, id, qty)
     },
-    remove(id: string) {
+    remove: (id: string) => {
       items.value = removeItem(items.value, id)
     },
-    replace(next: CartItem[]) {
+    replace: (next: CartItem[]) => {
       items.value = [...next]
     },
-    merge(more: CartItem[]) {
+    merge: (more: CartItem[]) => {
       items.value = mergeItems(items.value, more)
     },
-    clear() {
+    clear: () => {
       items.value = []
     },
   }

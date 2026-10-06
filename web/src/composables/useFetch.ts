@@ -5,7 +5,7 @@ export interface Fetched<T> {
   data: ShallowRef<T | null>
   error: ShallowRef<Error | null>
   loading: Ref<boolean>
-  reload(): void
+  reload: () => void
 }
 
 /** Fetches JSON whenever url() changes; aborts superseded requests; null url = idle. */
@@ -51,7 +51,7 @@ export function useFetch<T>(url: () => string | null): Fetched<T> {
     data,
     error,
     loading,
-    reload() {
+    reload: () => {
       run(url())
     },
   }

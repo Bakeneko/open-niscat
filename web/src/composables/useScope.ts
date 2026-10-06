@@ -19,10 +19,10 @@ export function useScope() {
     current,
     saved,
     isSaved,
-    adopt(s: Scope | null = current.value) {
+    adopt: (s: Scope | null = current.value) => {
       saved.value = s
     },
-    clear() {
+    clear: () => {
       saved.value = null
     },
   }

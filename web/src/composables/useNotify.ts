@@ -8,7 +8,7 @@ export function useNotify() {
   return {
     message,
     visible,
-    notify(text: string) {
+    notify: (text: string) => {
       message.value = text
       visible.value = true
     },
