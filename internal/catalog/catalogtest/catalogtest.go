@@ -43,12 +43,14 @@ CREATE INDEX part_ree_key ON part(ree_key);
 const rows = `
 INSERT INTO catalog VALUES
  ('AA','G01','VANETTE','C220L','LHD','04/87','11/94','0049','0049 TEST','N001','es,en,de,fr'),
- ('AB','G01','VANETTE','C220R','RHD','07/87','09/94','0050','0050 TEST','N002','en');
+ ('AB','G01','VANETTE','C220R','RHD','07/87','09/94','0050','0050 TEST','N002','en'),
+ ('AA','G02','VANETTE','C220L','LHD','12/94','12/95','0049','0049 LATE','N003','es,en,de,fr');
 INSERT INTO modelnis VALUES
  -- c04..c10 are NULL like in the real data (infosec uses '-' there, modelnis never does).
  ('AA','BELC220QSKVX','G01','1','1','1',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
  ('AA','BELC220QSKVX','G01','1','1','1',NULL,NULL,NULL,NULL,NULL,NULL,NULL), -- duplicate row, as in the real data
  ('AA','BELC220QJKL','G01','2','2','1',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+ ('AA','LATEMODEL','G02','1','1','1',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
  ('AB','RMODEL','G01','1',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 INSERT INTO attr_table VALUES
  ('AA','G01','T','T01','en','ENGINE'),('AA','G01','T','T01','fr','MOTEUR'),
@@ -82,6 +84,7 @@ INSERT INTO infosec VALUES
  ('AA','F','230A','G01','B','198704','199512','1','0','0','-','-','-','-','-','-','-'),
  ('AA','F','231','G01','B','198704','199512','2','0','0','-','-','-','-','-','-','-'),
  ('AA','','230','G01','B','198704','199512','0','0','0','-','-','-','-','-','-','-'),
+ ('AA','F','101','G02','A','199412','199512','0','0','0','-','-','-','-','-','-','-'),
  ('AB','F','040','G01','A','198701','199412','0','-','-','-','-','-','-','-','-','-');
 INSERT INTO hotspot VALUES
  ('AA','plate','AA230A','1',100,100,20,20),
@@ -100,6 +103,7 @@ var vins = []vinRow{
 	{"VSKBEC220U0111111", "VSKBEC220U0111111", "BELC220QJKL", "AA", "199301"},
 	{"116U0520133", "1    16  U0520133", "BELC220QSKVX", "AA", "198707"},
 	{"SJNVC220R00000001", "SJNVC220R00000001", "RMODEL", "AB", "198801"},
+	{"VSKLATE0000000001", "VSKLATE0000000001", "LATEMODEL", "AA", "199503"},
 }
 
 type partRow struct {

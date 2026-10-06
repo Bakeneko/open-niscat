@@ -70,6 +70,29 @@ func TestSectionScopedToAnotherSeries(t *testing.T) {
 	}
 }
 
+func TestSectionFromTheOtherPeriodOfTheSameSeries(t *testing.T) {
+	s := openFixture(t)
+	sc, err := s.ResolveScope(ctx, catalog.ScopeParams{VIN: "VSKLATE0000000001"}) // AA-G02, 03/1995
+	if err != nil {
+		t.Fatal(err)
+	}
+	sec, err := s.Section(ctx, "AA", "230A", sc, catalog.LangEN) // 230A only exists in AA-G01
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sec.Applicable == nil || *sec.Applicable {
+		t.Fatalf("applicable = %v, want false", sec.Applicable)
+	}
+	for _, l := range sec.Lines {
+		if l.InPeriod != nil {
+			t.Fatalf("line %s has a period warning in another catalog's section", l.ID)
+		}
+	}
+	if sec.Prev != "230" || sec.Next != "231" {
+		t.Fatalf("prev=%q next=%q, want the unfiltered neighbours 230/231", sec.Prev, sec.Next)
+	}
+}
+
 func TestSectionEnglishOnlySeriesInFrench(t *testing.T) {
 	s := openFixture(t)
 	sec, err := s.Section(ctx, "AB", "040", nil, catalog.LangFR)

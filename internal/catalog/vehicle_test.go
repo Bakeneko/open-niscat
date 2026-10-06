@@ -17,7 +17,7 @@ func TestCatalogs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(cats) != 2 || cats[0].Cat != "AA-G01" || cats[1].Cat != "AB-G01" {
+	if len(cats) != 3 || cats[0].Cat != "AA-G01" || cats[1].Cat != "AB-G01" || cats[2].Cat != "AA-G02" {
 		t.Fatalf("catalogs = %+v", cats)
 	}
 	if !reflect.DeepEqual(cats[0].Langs, []string{"es", "en", "de", "fr"}) || cats[0].Description != "0049 TEST" {

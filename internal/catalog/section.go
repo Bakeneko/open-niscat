@@ -93,8 +93,9 @@ func scanLine(rows *sql.Rows) (LineRef, error) {
 	return LineRef{Etd: str(etd), Sec: strings.TrimPrefix(str(plate), str(etd)), Line: l}, nil
 }
 
-// Section returns a plate. With a scope on the same series: applicability, period checks and neighbours
-// restricted to applicable sections; with a scope on another series: not applicable, no period checks.
+// Section returns a plate. With a scope on the same catalog (series and period): applicability, period checks
+// and neighbours restricted to applicable sections. With a scope on another catalog (another series, or a section
+// absent from the scope's period): not applicable, no period checks, unfiltered neighbours.
 func (s *Store) Section(ctx context.Context, etd, sec string, sc *Scope, lang Lang) (Section, error) {
 	etd, sec = strings.ToUpper(etd), strings.ToUpper(sec)
 	var code, name, notes, from, to sql.NullString
@@ -121,21 +122,26 @@ func (s *Store) Section(ctx context.Context, etd, sec string, sc *Scope, lang La
 		return Section{}, err
 	}
 
-	sameSeries := sc != nil && sc.Etd == etd
+	sameCatalog := false
+	if sc != nil && sc.Etd == etd {
+		if sameCatalog, err = s.inGrupo(ctx, etd, sc.Grupo, sec); err != nil {
+			return Section{}, err
+		}
+	}
 	var applicable map[string]bool
-	if sameSeries {
+	if sameCatalog {
 		if applicable, err = s.applicableSections(ctx, sc); err != nil {
 			return Section{}, err
 		}
 	}
 	switch {
-	case sc != nil && !sameSeries:
+	case sc != nil && !sameCatalog:
 		out.Applicable = new(bool)
 	case applicable != nil:
 		ok := applicable[sec]
 		out.Applicable = &ok
 	}
-	if sameSeries && sc.ProdDate > 0 {
+	if sameCatalog && sc.ProdDate > 0 {
 		for i := range out.Lines {
 			if p := out.Lines[i].period; p != nil {
 				in := p.Contains(sc.ProdDate)
@@ -145,13 +151,27 @@ func (s *Store) Section(ctx context.Context, etd, sec string, sc *Scope, lang La
 	}
 
 	grupo := ""
-	if sameSeries {
+	if sameCatalog {
 		grupo = sc.Grupo
 	}
 	if out.Prev, out.Next, err = s.neighbours(ctx, etd, grupo, out.Group.Code, sec, applicable, lang); err != nil {
 		return Section{}, err
 	}
 	return out, nil
+}
+
+// inGrupo reports whether a section belongs to the given period of its series.
+func (s *Store) inGrupo(ctx context.Context, etd, grupo, sec string) (bool, error) {
+	var one int
+	err := s.db.QueryRowContext(ctx, "SELECT 1 FROM infosec WHERE variant = 'F' AND etd = ? AND grupo = ? AND secc = ? LIMIT 1",
+		etd, grupo, sec).Scan(&one)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
+		return false, fmt.Errorf("section period: %w", err)
+	}
+	return true, nil
 }
 
 func (s *Store) plateLines(ctx context.Context, etd, plate string, lang Lang) ([]Line, error) {
