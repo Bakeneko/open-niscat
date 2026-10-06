@@ -55,8 +55,8 @@ const indent = (l: Line) => ({ paddingLeft: `${String(Math.max(l.level - 1, 0) *
           <td>
             <v-chip
               v-if="l.from || l.to"
-              size="x-small"
-              class="text-no-wrap"
+              size="small"
+              class="text-no-wrap px-2"
               :color="l.inPeriod === false ? 'warning' : undefined"
               :variant="l.inPeriod === false ? 'flat' : 'tonal'"
               :title="l.inPeriod === false ? t('part.outOfPeriod') : undefined"
@@ -141,7 +141,7 @@ const indent = (l: Line) => ({ paddingLeft: `${String(Math.max(l.level - 1, 0) *
 /* Tight cells: the table lives in a narrow side panel or a phone screen. */
 .parts-table :deep(th),
 .parts-table :deep(td) {
-  padding: 0 6px;
+  padding: 0 5px;
 }
 .parts-table :deep(td) {
   overflow-wrap: anywhere;
