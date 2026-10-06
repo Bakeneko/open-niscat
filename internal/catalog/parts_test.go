@@ -39,6 +39,29 @@ func TestPartChainStopsOnCycles(t *testing.T) {
 	}
 }
 
+func keys(links []catalog.RefLink) []string {
+	out := make([]string, 0, len(links))
+	for _, l := range links {
+		out = append(out, l.Key)
+	}
+	return out
+}
+
+func TestPartListsEveryRelatedReference(t *testing.T) {
+	s := openFixture(t)
+	p, err := s.Part(ctx, "90000-00003", catalog.LangEN)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Both alternatives it replaces, and both successors, latest period start first.
+	if got := keys(p.Previous); !reflect.DeepEqual(got, []string{"9000000005", "9000000004"}) && !reflect.DeepEqual(got, []string{"9000000004", "9000000005"}) {
+		t.Errorf("previous = %v, want both 9000000004 and 9000000005", got)
+	}
+	if got := keys(p.Next); !reflect.DeepEqual(got, []string{"9000000007", "9000000006"}) {
+		t.Errorf("next = %v, want [9000000007 9000000006]", got)
+	}
+}
+
 func TestPartNotFound(t *testing.T) {
 	s := openFixture(t)
 	if _, err := s.Part(ctx, "00000-00000", catalog.LangEN); !errors.Is(err, catalog.ErrNotFound) {

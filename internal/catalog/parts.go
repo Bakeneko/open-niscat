@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"sort"
 )
 
 // maxChain bounds replacement chain walks.
@@ -15,7 +16,8 @@ type RefLink struct {
 	PartNo string `json:"partNo"`
 }
 
-// PartInfo describes a reference: where it is used and its replacement chain both ways (nearest first).
+// PartInfo describes a reference: where it is used, and every reference it replaces (Previous) or that
+// replaces it (Next), nearest first.
 type PartInfo struct {
 	Key         string    `json:"key"`
 	PartNo      string    `json:"partNo"`
@@ -25,55 +27,93 @@ type PartInfo struct {
 	Next        []RefLink `json:"next"`
 }
 
-// step returns the next reference of key. Forward: rows whose alternative (ree) is key, i.e. its successors.
-// Backward: the alternatives of key's rows, i.e. its predecessors. Several candidates: latest period start wins.
-func (s *Store) step(ctx context.Context, key string, forward bool) (RefLink, bool, error) {
+// candidates returns the distinct references next to key, latest period start first (ties: higher key first).
+// Forward: rows whose alternative (ree) is key, i.e. its successors. Backward: the alternatives of key's rows,
+// i.e. its predecessors.
+func (s *Store) candidates(ctx context.Context, key string, forward bool) ([]RefLink, error) {
 	query := "SELECT part_key, part_no, dataplic FROM part WHERE ree_key = ? AND part_key IS NOT NULL AND part_key <> ?"
 	if !forward {
 		query = "SELECT ree_key, ree, dataplic FROM part WHERE part_key = ? AND ree_key IS NOT NULL AND ree_key <> ?"
 	}
 	rows, err := s.db.QueryContext(ctx, query, key, key)
 	if err != nil {
-		return RefLink{}, false, fmt.Errorf("replacement chain: %w", err)
+		return nil, fmt.Errorf("replacement chain: %w", err)
 	}
 	defer rows.Close()
-	var best RefLink
-	bestStart, found := -1, false
+	starts := map[string]int{}
+	var out []RefLink
 	for rows.Next() {
 		var k, no, dataplic sql.NullString
 		if err := rows.Scan(&k, &no, &dataplic); err != nil {
-			return RefLink{}, false, fmt.Errorf("replacement chain: %w", err)
+			return nil, fmt.Errorf("replacement chain: %w", err)
 		}
 		start := 0
 		if p, ok := ParsePeriod(str(dataplic)); ok {
 			start = p.From
 		}
-		cand := RefLink{Key: str(k), PartNo: str(no)}
-		if start > bestStart || (start == bestStart && cand.Key > best.Key) {
-			best, bestStart, found = cand, start, true
+		ref := str(k)
+		prev, seen := starts[ref]
+		if !seen {
+			out = append(out, RefLink{Key: ref, PartNo: str(no)})
+		}
+		if !seen || start > prev {
+			starts[ref] = start
 		}
 	}
 	if err := rows.Err(); err != nil {
-		return RefLink{}, false, fmt.Errorf("replacement chain: %w", err)
+		return nil, fmt.Errorf("replacement chain: %w", err)
 	}
-	return best, found, nil
+	sort.SliceStable(out, func(i, j int) bool {
+		si, sj := starts[out[i].Key], starts[out[j].Key]
+		if si != sj {
+			return si > sj
+		}
+		return out[i].Key > out[j].Key
+	})
+	return out, nil
 }
 
-// chain walks from key in one direction until no further reference, a cycle or maxChain.
+// chain follows the preferred (first) candidate from key until none is left, a cycle or maxChain.
 func (s *Store) chain(ctx context.Context, key string, forward bool) ([]RefLink, error) {
 	seen := map[string]bool{key: true}
 	out := []RefLink{}
 	for cur := key; len(out) < maxChain; {
-		next, ok, err := s.step(ctx, cur, forward)
+		next, err := s.candidates(ctx, cur, forward)
 		if err != nil {
 			return nil, err
 		}
-		if !ok || seen[next.Key] {
+		if len(next) == 0 || seen[next[0].Key] {
 			break
 		}
-		seen[next.Key] = true
-		out = append(out, next)
-		cur = next.Key
+		seen[next[0].Key] = true
+		out = append(out, next[0])
+		cur = next[0].Key
+	}
+	return out, nil
+}
+
+// related lists every reference reachable from key in one direction, breadth-first (nearest first), without
+// duplicates, bounded by maxChain.
+func (s *Store) related(ctx context.Context, key string, forward bool) ([]RefLink, error) {
+	seen := map[string]bool{key: true}
+	out := []RefLink{}
+	for frontier := []string{key}; len(frontier) > 0 && len(out) < maxChain; {
+		var level []string
+		for _, k := range frontier {
+			next, err := s.candidates(ctx, k, forward)
+			if err != nil {
+				return nil, err
+			}
+			for _, c := range next {
+				if seen[c.Key] || len(out) >= maxChain {
+					continue
+				}
+				seen[c.Key] = true
+				out = append(out, c)
+				level = append(level, c.Key)
+			}
+		}
+		frontier = level
 	}
 	return out, nil
 }
@@ -113,10 +153,10 @@ func (s *Store) Part(ctx context.Context, ref string, lang Lang) (PartInfo, erro
 	if err := rows.Err(); err != nil {
 		return PartInfo{}, fmt.Errorf("part occurrences: %w", err)
 	}
-	if info.Previous, err = s.chain(ctx, key, false); err != nil {
+	if info.Previous, err = s.related(ctx, key, false); err != nil {
 		return PartInfo{}, err
 	}
-	if info.Next, err = s.chain(ctx, key, true); err != nil {
+	if info.Next, err = s.related(ctx, key, true); err != nil {
 		return PartInfo{}, err
 	}
 	if len(info.Occurrences) == 0 && len(info.Previous) == 0 && len(info.Next) == 0 {
