@@ -56,8 +56,12 @@ const hasHidden = computed(() => (data.value?.sections ?? []).some((s) => s.appl
 const titles = computed(() => {
   const out: Record<string, string> = {}
   for (const h of data.value?.hotspots ?? []) {
-    out[h.key] = (data.value?.sections ?? [])
-      .filter((s) => sectionMatchesCaption(s.sec, h.caption))
+    // Applicable sections only; a greyed hotspot (none applies) still lists its own sections.
+    const matching = (data.value?.sections ?? []).filter((s) =>
+      sectionMatchesCaption(s.sec, h.caption),
+    )
+    const applicable = matching.filter((s) => s.applicable !== false)
+    out[h.key] = (applicable.length > 0 ? applicable : matching)
       .map((s) => `${s.sec} ${s.name}`)
       .join('\n')
   }

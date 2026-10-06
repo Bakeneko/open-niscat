@@ -88,7 +88,34 @@ function spotKey(target: EventTarget | null): string | null {
     ? (target.closest<HTMLElement>('[data-key]')?.dataset.key ?? null)
     : null
 }
+// Hover hint: the browser's title tooltip waits about a second, too long while scanning a drawing.
+const TIP_DELAY = 300
+const tip = ref<{ text: string; x: number; y: number } | null>(null)
+let tipTimer: ReturnType<typeof setTimeout> | undefined
+function tipStyle(at: { x: number; y: number }) {
+  const w = box.value?.clientWidth ?? 0
+  return at.x > w * 0.6
+    ? { right: `${String(w - at.x + 12)}px`, top: `${String(at.y + 16)}px` }
+    : { left: `${String(at.x + 12)}px`, top: `${String(at.y + 16)}px` }
+}
+function onSpotEnter(e: PointerEvent, h: Hotspot) {
+  if (e.pointerType !== 'mouse' || pointers.size > 0) return
+  clearTimeout(tipTimer)
+  const at = local(e)
+  tipTimer = setTimeout(() => {
+    tip.value = { text: props.titles?.[h.key] ?? h.caption, ...at }
+  }, TIP_DELAY)
+}
+function onSpotMove(e: PointerEvent) {
+  if (tip.value !== null) tip.value = { ...tip.value, ...local(e) }
+}
+function hideTip() {
+  clearTimeout(tipTimer)
+  tip.value = null
+}
+
 function onDown(e: PointerEvent) {
+  hideTip()
   if (e.target instanceof Element && e.target.closest('.tools') !== null) return
   if (e.pointerType === 'mouse' && e.button !== 0) return
   if (e.isPrimary) {
@@ -157,7 +184,10 @@ onMounted(() => {
     resize.observe(box.value)
   }
 })
-onBeforeUnmount(() => resize?.disconnect())
+onBeforeUnmount(() => {
+  resize?.disconnect()
+  clearTimeout(tipTimer)
+})
 watch(
   () => props.src,
   () => {
@@ -193,8 +223,10 @@ watch(
         :class="{ selected: h.key === selected, labelled: labels, muted: muted?.includes(h.key) }"
         :style="spotStyle(h)"
         :data-key="h.key"
-        :title="titles?.[h.key] ?? h.caption"
         :aria-label="h.caption"
+        @pointerenter="onSpotEnter($event, h)"
+        @pointermove="onSpotMove"
+        @pointerleave="hideTip"
         @click="onKeySpot($event, h.key)"
       >
         <span
@@ -205,6 +237,7 @@ watch(
         >
       </button>
     </div>
+    <div v-if="tip" class="tip" :style="tipStyle(tip)">{{ tip.text }}</div>
     <div class="tools no-print">
       <v-btn :icon="mdiMagnifyPlus" size="small" :title="t('section.zoomIn')" @click="zoom(1.4)" />
       <v-btn
@@ -301,6 +334,19 @@ watch(
 .hotspot.selected {
   border-color: rgb(var(--v-theme-primary));
   background: rgba(var(--v-theme-primary), 0.18);
+}
+.tip {
+  position: absolute;
+  z-index: 3;
+  max-width: 360px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(33, 33, 33, 0.92);
+  color: #fff;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  white-space: pre-line;
+  pointer-events: none;
 }
 .tools {
   position: absolute;
