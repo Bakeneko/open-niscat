@@ -30,6 +30,9 @@ describe('scope', () => {
     expect(isScope({ vin: 'V1' })).toBe(true)
     expect(isScope({ model: 'M' })).toBe(false)
     expect(isScope({ vin: 3 })).toBe(false)
+    expect(isScope({ vin: '' })).toBe(false)
+    expect(isScope({ cat: '  ' })).toBe(false)
+    expect(isScope({ cat: 'AA-G01', model: '' })).toBe(false)
     expect(isScopeOrNull(null)).toBe(true)
   })
   it('labels', () => {

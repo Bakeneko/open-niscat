@@ -65,13 +65,9 @@ router.beforeEach(async (to) => {
   // Pages that need a vehicle get the remembered one when the URL has none (spec §5).
   if (to.meta.scoped === true && scopeFromQuery(to.query) === null) {
     const saved = useSavedScope().value
-    if (saved !== null)
-      return {
-        path: to.path,
-        query: { ...to.query, ...scopeToQuery(saved) },
-        hash: to.hash,
-        replace: true,
-      }
+    const query = { ...to.query, ...scopeToQuery(saved) }
+    if (scopeFromQuery(query) !== null)
+      return { path: to.path, query, hash: to.hash, replace: true }
   }
   return true
 })

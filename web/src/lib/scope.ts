@@ -36,13 +36,10 @@ export function sameScope(a: Scope | null, b: Scope | null): boolean {
 export function isScope(v: unknown): v is Scope {
   if (typeof v !== 'object' || v === null) return false
   const o = v as Record<string, unknown>
-  const ok = (k: string) => o[k] === undefined || typeof o[k] === 'string'
-  return (
-    ok('vin') &&
-    ok('cat') &&
-    ok('model') &&
-    (typeof o.vin === 'string' || typeof o.cat === 'string')
-  )
+  // Blank values would round-trip through the URL as "no scope" and make the router guard loop.
+  const filled = (k: string) => typeof o[k] === 'string' && o[k].trim() !== ''
+  const ok = (k: string) => o[k] === undefined || filled(k)
+  return ok('vin') && ok('cat') && ok('model') && (filled('vin') || filled('cat'))
 }
 
 export function isScopeOrNull(v: unknown): v is Scope | null {
