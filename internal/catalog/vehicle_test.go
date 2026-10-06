@@ -69,6 +69,17 @@ func TestIdentifyVINTail(t *testing.T) {
 	}
 }
 
+func TestIdentifyVINTailIgnoresDuplicateRows(t *testing.T) {
+	s := openFixture(t)
+	res, err := s.IdentifyVIN(ctx, "0990494", catalog.LangEN)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Candidates) != 1 {
+		t.Fatalf("candidates = %+v, want one (the VIN is stored twice)", res.Candidates)
+	}
+}
+
 func TestIdentifyVINNotFound(t *testing.T) {
 	s := openFixture(t)
 	for _, in := range []string{"ZZZZZZZZZ", "0494", "*[?]*"} {

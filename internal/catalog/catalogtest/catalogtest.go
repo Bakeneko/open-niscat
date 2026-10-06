@@ -45,9 +45,11 @@ INSERT INTO catalog VALUES
  ('AA','G01','VANETTE','C220L','LHD','04/87','11/94','0049','0049 TEST','N001','es,en,de,fr'),
  ('AB','G01','VANETTE','C220R','RHD','07/87','09/94','0050','0050 TEST','N002','en');
 INSERT INTO modelnis VALUES
- ('AA','BELC220QSKVX','G01','1','1','1','-','-','-','-','-','-','-'),
- ('AA','BELC220QJKL','G01','2','2','1','-','-','-','-','-','-','-'),
- ('AB','RMODEL','G01','1','-','-','-','-','-','-','-','-','-');
+ -- c04..c10 are NULL like in the real data (infosec uses '-' there, modelnis never does).
+ ('AA','BELC220QSKVX','G01','1','1','1',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+ ('AA','BELC220QSKVX','G01','1','1','1',NULL,NULL,NULL,NULL,NULL,NULL,NULL), -- duplicate row, as in the real data
+ ('AA','BELC220QJKL','G01','2','2','1',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+ ('AB','RMODEL','G01','1',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 INSERT INTO attr_table VALUES
  ('AA','G01','T','T01','en','ENGINE'),('AA','G01','T','T01','fr','MOTEUR'),
  ('AA','G01','T','T02','en','WHEEL BASE'),('AA','G01','T','T02','fr','EMPATTEMENT'),
@@ -93,6 +95,7 @@ INSERT INTO cinfo VALUES ('AA','G0101.pdf');
 type vinRow struct{ vin, raw, model, etd, prod string }
 
 var vins = []vinRow{
+	{"VSKBEC220U0990494", "VSKBEC220U0990494", "BELC220QSKVX", "AA", "198905"},
 	{"VSKBEC220U0990494", "VSKBEC220U0990494", "BELC220QSKVX", "AA", "198905"},
 	{"VSKBEC220U0111111", "VSKBEC220U0111111", "BELC220QJKL", "AA", "199301"},
 	{"116U0520133", "1    16  U0520133", "BELC220QSKVX", "AA", "198707"},

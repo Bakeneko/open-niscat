@@ -213,7 +213,7 @@ func (s *Store) Models(ctx context.Context, etd, grupo string, lang Lang) ([]Mod
 	if err != nil {
 		return nil, err
 	}
-	rows, err := s.db.QueryContext(ctx, `SELECT codenis, c01, c02, c03, c04, c05, c06, c07, c08, c09, c10
+	rows, err := s.db.QueryContext(ctx, `SELECT DISTINCT codenis, c01, c02, c03, c04, c05, c06, c07, c08, c09, c10
 		FROM modelnis WHERE etd = ? AND grupo = ? ORDER BY codenis`, etd, grupo)
 	if err != nil {
 		return nil, fmt.Errorf("list models: %w", err)
@@ -240,7 +240,7 @@ func (s *Store) Models(ctx context.Context, etd, grupo string, lang Lang) ([]Mod
 }
 
 func (s *Store) vinCounts(ctx context.Context, etd string) (map[string]int, error) {
-	rows, err := s.db.QueryContext(ctx, "SELECT codenis, COUNT(*) FROM vin WHERE etd = ? GROUP BY codenis", etd)
+	rows, err := s.db.QueryContext(ctx, "SELECT codenis, COUNT(DISTINCT vin) FROM vin WHERE etd = ? GROUP BY codenis", etd)
 	if err != nil {
 		return nil, fmt.Errorf("count VINs: %w", err)
 	}
@@ -277,7 +277,7 @@ func (s *Store) Vehicle(ctx context.Context, sc *Scope, lang Lang) (Vehicle, err
 		if v.Attributes, err = s.attributes(ctx, sc.Etd, sc.Grupo, sc.values[:], lang); err != nil {
 			return Vehicle{}, err
 		}
-		err = s.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM vin WHERE etd = ? AND codenis = ?", sc.Etd, sc.Model).
+		err = s.db.QueryRowContext(ctx, "SELECT COUNT(DISTINCT vin) FROM vin WHERE etd = ? AND codenis = ?", sc.Etd, sc.Model).
 			Scan(&v.VINCount)
 		if err != nil {
 			return Vehicle{}, fmt.Errorf("count VINs: %w", err)
@@ -348,7 +348,7 @@ func (s *Store) IdentifyVIN(ctx context.Context, input string, lang Lang) (VINRe
 }
 
 func (s *Store) vinsEndingWith(ctx context.Context, tail string) ([]VINMatch, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT v.vin, v.codenis, v.etd, v.prodata,
+	rows, err := s.db.QueryContext(ctx, `SELECT DISTINCT v.vin, v.codenis, v.etd, v.prodata,
 		(SELECT m.grupo FROM modelnis m WHERE m.etd = v.etd AND m.codenis = v.codenis LIMIT 1)
 		FROM vin v WHERE v.vin_rev GLOB ? ORDER BY v.vin LIMIT 20`, reverse(tail)+"*")
 	if err != nil {
