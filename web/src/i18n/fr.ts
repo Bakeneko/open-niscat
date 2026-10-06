@@ -78,6 +78,7 @@ export const fr: typeof en = {
   part: {
     mark: 'Marque',
     item: 'Repère',
+    part: 'Pièce',
     reference: 'Numéro de pièce',
     description: 'Description',
     qty: 'Qté',

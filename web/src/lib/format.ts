@@ -14,3 +14,8 @@ export function formatRange(
   if (f === '' && t === '') return ''
   return `${f} – ${t}`.trim()
 }
+
+/** NISCAT labels often omit the space after a comma ("DEMARREUR,COMPLET"), which prevents wrapping. */
+export function readable(s: string): string {
+  return s.replace(/,(?=[^\s\d])/g, ', ')
+}

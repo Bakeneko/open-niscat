@@ -76,6 +76,7 @@ export const en = {
   part: {
     mark: 'Mark',
     item: 'Item',
+    part: 'Part',
     reference: 'Part number',
     description: 'Description',
     qty: 'Qty',

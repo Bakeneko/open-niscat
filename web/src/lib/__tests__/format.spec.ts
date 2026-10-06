@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatRange, formatYearMonth } from '../format'
+import { formatRange, formatYearMonth, readable } from '../format'
 
 describe('format', () => {
   it('formats year-months', () => {
@@ -13,5 +13,13 @@ describe('format', () => {
     expect(formatRange(null, '1988-02')).toBe('– 02/88')
     expect(formatRange('1994-11', null)).toBe('11/94 –')
     expect(formatRange(null, null)).toBe('')
+  })
+})
+
+describe('readable', () => {
+  it('adds a space after commas so long labels can wrap', () => {
+    expect(readable('DEMARREUR,COMPLET')).toBe('DEMARREUR, COMPLET')
+    expect(readable('A, B,C')).toBe('A, B, C')
+    expect(readable('1,5 L')).toBe('1,5 L')
   })
 })
