@@ -70,6 +70,7 @@ export interface Hotspot {
 export interface SectionSummary {
   sec: string
   name: string
+  nameEn?: string
   notes: string
   from: YearMonth | null
   to: YearMonth | null
@@ -119,6 +120,7 @@ export interface Section {
   plate: string
   group: Group
   name: string
+  nameEn?: string
   notes: string
   from: YearMonth | null
   to: YearMonth | null
@@ -134,6 +136,7 @@ export interface SectionHit {
   sec: string
   group: Group
   name: string
+  nameEn?: string
   notes: string
 }
 export interface SearchResult {

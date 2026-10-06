@@ -181,9 +181,12 @@ function setAll(v: boolean | null) {
           v-for="s in data.sections"
           :key="`${s.etd}${s.sec}`"
           :to="links.to(`/section/${s.etd}/${s.sec}`)"
-          :title="`${s.etd} ${s.sec} — ${s.name}`"
           :subtitle="`${s.group.code} ${s.group.label}${s.notes ? ' · ' + s.notes : ''}`"
-        />
+        >
+          <template #title>
+            <span :title="s.nameEn">{{ s.etd }} {{ s.sec }} — {{ s.name }}</span>
+          </template>
+        </v-list-item>
       </v-list>
       <v-pagination
         v-if="pages > 1"

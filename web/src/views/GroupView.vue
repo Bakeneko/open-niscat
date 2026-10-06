@@ -102,10 +102,12 @@ const titles = computed(() => {
               v-for="s in sections"
               :key="s.sec"
               :to="links.to(`/section/${etd}/${s.sec}`)"
-              :title="`${s.sec} — ${s.name}`"
               :subtitle="[s.notes, formatRange(s.from, s.to)].filter((x) => x !== '').join(' · ')"
               :class="{ 'text-disabled': s.applicable === false }"
             >
+              <template #title>
+                <span :title="s.nameEn">{{ s.sec }} — {{ s.name }}</span>
+              </template>
               <template v-if="s.applicable === false" #append>
                 <v-chip size="x-small" color="error" variant="tonal">{{
                   t('group.notApplicable')

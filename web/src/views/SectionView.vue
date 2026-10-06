@@ -107,7 +107,7 @@ watch([selected, data], async ([key, s]) => {
         >{{ t('section.notApplicable') }}</v-alert
       >
       <div class="d-flex align-center flex-wrap ga-2 mb-2">
-        <h1 class="text-h6">{{ data.sec }} — {{ data.name }}</h1>
+        <h1 class="text-h6" :title="data.nameEn">{{ data.sec }} — {{ data.name }}</h1>
         <span class="text-medium-emphasis">{{
           [data.notes, formatRange(data.from, data.to)].filter((x) => x !== '').join(' · ')
         }}</span>
