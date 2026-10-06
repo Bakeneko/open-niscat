@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { mdiCart, mdiMagnify } from '@mdi/js'
+import { mdiBookOpenVariant, mdiCart, mdiHome, mdiMagnify } from '@mdi/js'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -41,9 +41,29 @@ function search() {
 
 <template>
   <v-app-bar density="comfortable" class="no-print">
-    <v-app-bar-title class="flex-grow-0">
-      <RouterLink :to="links.to('/')" class="brand">{{ t('app.title') }}</RouterLink>
-    </v-app-bar-title>
+    <!-- Labels show from medium screens up; phones keep the icons only. -->
+    <v-btn
+      :to="links.to('/', {}, false)"
+      variant="text"
+      min-width="0"
+      class="ms-1 px-2"
+      :title="t('nav.home')"
+      :aria-label="t('nav.home')"
+    >
+      <v-icon :icon="mdiHome" />
+      <span class="d-none d-md-inline ms-2 font-weight-bold">{{ t('app.title') }}</span>
+    </v-btn>
+    <v-btn
+      :to="links.to('/catalogs', {}, false)"
+      variant="text"
+      min-width="0"
+      class="px-2"
+      :title="t('nav.catalogs')"
+      :aria-label="t('nav.catalogs')"
+    >
+      <v-icon :icon="mdiBookOpenVariant" />
+      <span class="d-none d-md-inline ms-2">{{ t('nav.catalogs') }}</span>
+    </v-btn>
     <ScopeChip />
     <v-text-field
       v-model="q"
