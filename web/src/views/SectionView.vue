@@ -8,7 +8,6 @@ import { apiPath } from '@/api/client'
 import type { Line, Section, Vehicle } from '@/api/types'
 import DrawingViewer from '@/components/DrawingViewer.vue'
 import ErrorAlert from '@/components/ErrorAlert.vue'
-import PartDetail from '@/components/PartDetail.vue'
 import PartsTable from '@/components/PartsTable.vue'
 import { useCart } from '@/composables/useCart'
 import { useFetch } from '@/composables/useFetch'
@@ -45,9 +44,6 @@ const selected = computed(() => {
   return typeof v === 'string' && v !== '' ? v.replace(/^0+(?=.)/, '') : null
 })
 const tab = computed(() => (route.query.tab === 'info' ? 'info' : 'drawing'))
-const selectedLines = computed(() =>
-  (data.value?.lines ?? []).filter((l) => selected.value !== null && l.itemKey === selected.value),
-)
 const titles = computed(() => {
   const out: Record<string, string> = {}
   for (const l of data.value?.lines ?? []) out[l.itemKey] ??= `${l.partNo} ${l.description}`
@@ -68,8 +64,11 @@ function print() {
   window.print()
 }
 
+// Selecting the selected item again closes it.
 function select(key: string) {
-  const query = { ...route.query, item: key, ...(smAndDown.value ? { tab: 'info' } : {}) }
+  const query = { ...route.query }
+  if (key === selected.value) delete query.item
+  else Object.assign(query, { item: key }, smAndDown.value ? { tab: 'info' } : {})
   void router.replace({ query })
 }
 function setTab(v: unknown) {
@@ -90,7 +89,7 @@ watch([selected, data], async ([key, s]) => {
   await nextTick()
   document
     .querySelector(`.parts-table tr[data-item="${CSS.escape(key)}"]`)
-    ?.scrollIntoView({ block: 'nearest' })
+    ?.scrollIntoView({ block: 'start', behavior: 'smooth' })
 })
 </script>
 
@@ -168,7 +167,9 @@ watch([selected, data], async ([key, s]) => {
           />
         </div>
         <div v-show="tab === 'info'" class="print-show">
-          <PartDetail :lines="selectedLines" class="my-2 no-print" @add="add" />
+          <p v-if="selected === null" class="text-caption text-medium-emphasis mb-1 no-print">
+            {{ t('section.select') }}
+          </p>
           <PartsTable :lines="data.lines" :selected="selected" @select="select" @add="add" />
         </div>
       </template>
@@ -182,7 +183,9 @@ watch([selected, data], async ([key, s]) => {
           @select="select"
         />
         <div class="split-side">
-          <PartDetail :lines="selectedLines" class="mb-2 no-print" @add="add" />
+          <p v-if="selected === null" class="text-caption text-medium-emphasis mb-1 no-print">
+            {{ t('section.select') }}
+          </p>
           <PartsTable :lines="data.lines" :selected="selected" @select="select" @add="add" />
         </div>
       </div>
