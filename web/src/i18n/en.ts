@@ -21,6 +21,7 @@ export const en = {
     history: 'Recently viewed',
     searchLabel: 'Search parts or sections',
   },
+  lang: { label: 'Language', en: 'English', fr: 'French' },
   scope: {
     none: 'No vehicle',
     choose: 'Choose a vehicle',
