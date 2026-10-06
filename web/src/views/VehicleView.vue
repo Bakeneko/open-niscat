@@ -47,6 +47,7 @@ watch(vehicle.data, (v) => {
     </v-alert>
     <v-progress-linear v-if="vehicle.loading.value || groups.loading.value" indeterminate />
     <ErrorAlert :error="vehicle.error.value" @retry="vehicle.reload" />
+    <ErrorAlert :error="groups.error.value" @retry="groups.reload" />
     <VehicleCard v-if="vehicle.data.value" :vehicle="vehicle.data.value" class="mb-4" />
     <h2 v-if="groups.data.value" class="text-subtitle-1 mb-2">{{ t('vehicle.groups') }}</h2>
     <v-row v-if="groups.data.value && cat" dense>

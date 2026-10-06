@@ -16,8 +16,15 @@ const fileName = (url: string) => url.split('/').pop() ?? url
       {{ vehicle.catalog.drive }}</v-card-title
     >
     <v-card-subtitle>
-      {{ vehicle.catalog.cat }} · {{ formatRange(vehicle.catalog.from, vehicle.catalog.to) }} ·
-      {{ vehicle.catalog.description }}
+      {{
+        [
+          vehicle.catalog.cat,
+          formatRange(vehicle.catalog.from, vehicle.catalog.to),
+          vehicle.catalog.description,
+        ]
+          .filter(Boolean)
+          .join(' · ')
+      }}
     </v-card-subtitle>
     <v-card-text>
       <v-table density="compact">

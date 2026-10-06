@@ -45,6 +45,7 @@ export const en = {
   models: {
     title: 'Model codes',
     filter: 'Filter',
+    any: 'Any',
     use: 'Use',
     vins: 'VINs',
     count: '{n} model codes',

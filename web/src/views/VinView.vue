@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { apiPath } from '@/api/client'
+import { ApiError, apiPath } from '@/api/client'
 import type { VinResult } from '@/api/types'
 import ErrorAlert from '@/components/ErrorAlert.vue'
 import VehicleCard from '@/components/VehicleCard.vue'
@@ -23,6 +23,8 @@ const { data, error, loading, reload } = useFetch<VinResult>(() =>
   apiPath(`/api/vin/${encodeURIComponent(vin.value)}`, { lang: lang.value }),
 )
 
+const notFound = computed(() => error.value instanceof ApiError && error.value.code === 'not_found')
+
 function use() {
   const v = data.value?.vehicle?.vin
   if (v === undefined) return
@@ -34,7 +36,13 @@ function use() {
 <template>
   <v-container style="max-width: 760px">
     <v-progress-linear v-if="loading" indeterminate />
-    <ErrorAlert :error="error" @retry="reload" />
+    <v-alert v-if="notFound" type="warning" variant="tonal">
+      {{ t('vin.notFound') }} <strong>{{ vin }}</strong>
+      <div class="mt-2">
+        <RouterLink :to="links.to('/', {}, false)">{{ t('scope.choose') }}</RouterLink>
+      </div>
+    </v-alert>
+    <ErrorAlert v-else :error="error" @retry="reload" />
     <template v-if="data?.vehicle">
       <VehicleCard :vehicle="data.vehicle" />
       <v-btn color="primary" class="mt-3" @click="use">{{ t('scope.use') }}</v-btn>

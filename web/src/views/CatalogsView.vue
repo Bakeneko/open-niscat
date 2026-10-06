@@ -22,7 +22,7 @@ const { data, error, loading, reload } = useFetch<Catalog[]>(() => '/api/catalog
         :key="c.cat"
         :to="links.to(`/catalogs/${c.cat}`, {}, false)"
         :title="`${c.model} ${c.cmodel} · ${c.drive}`"
-        :subtitle="`${c.cat} · ${formatRange(c.from, c.to)} · ${c.description}`"
+        :subtitle="[c.cat, formatRange(c.from, c.to), c.description].filter(Boolean).join(' · ')"
       />
     </v-list>
   </v-container>

@@ -47,6 +47,7 @@ export const fr: typeof en = {
   models: {
     title: 'Codes modèle',
     filter: 'Filtrer',
+    any: 'Tous',
     use: 'Utiliser',
     vins: 'VIN',
     count: '{n} codes modèle',

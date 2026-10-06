@@ -57,7 +57,7 @@ function use(model: string) {
       <v-col v-for="tb in tables" :key="tb.table" cols="6" md="3" lg="2">
         <v-select
           :model-value="filters[tb.table] ?? ''"
-          :items="['', ...choices(tb.table)]"
+          :items="[{ title: t('models.any'), value: '' }, ...choices(tb.table)]"
           :label="tb.name"
           density="compact"
           hide-details
