@@ -67,13 +67,13 @@ type ModelInfo struct {
 	Attributes []Attribute `json:"attributes"`
 }
 
-const catalogColumns = "etd, grupo, model, cmodel, drive, date_from, date_to, serie, data, langs"
+const catalogColumns = "etd, grupo, model, cmodel, drive, date_from, date_to, serie, data"
 
 type scanner interface{ Scan(dest ...any) error }
 
 func (s *Store) scanCatalog(row scanner) (Info, error) {
-	var f [10]sql.NullString
-	if err := row.Scan(&f[0], &f[1], &f[2], &f[3], &f[4], &f[5], &f[6], &f[7], &f[8], &f[9]); err != nil {
+	var f [9]sql.NullString
+	if err := row.Scan(&f[0], &f[1], &f[2], &f[3], &f[4], &f[5], &f[6], &f[7], &f[8]); err != nil {
 		return Info{}, fmt.Errorf("scan catalog: %w", err)
 	}
 	info := Info{

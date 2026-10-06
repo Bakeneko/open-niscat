@@ -187,3 +187,32 @@ func TestCancelledRequestIsNotLogged(t *testing.T) {
 		t.Fatalf("cancelled request logged: %s", logs.String())
 	}
 }
+
+// TestWireShapes pins the JSON contract the frontend types rely on.
+func TestWireShapes(t *testing.T) {
+	h := newServer(t)
+	sec := decode(t, get(t, h, "/api/sections/AA/230A?vin=VSKBEC220U0990494&lang=fr"))
+	line, _ := sec["lines"].([]any)[0].(map[string]any)
+	if sec["from"] != "1987-04" || line["from"] != "1987-04" || line["to"] != "1987-04" {
+		t.Errorf("section/line dates = %v / %v %v", sec["from"], line["from"], line["to"])
+	}
+	for _, gone := range []string{"dataplic", "period"} {
+		if _, ok := line[gone]; ok {
+			t.Errorf("line still has %q", gone)
+		}
+	}
+	hits := decode(t, get(t, h, "/api/search?q=alternateur&type=sections&lang=fr"))
+	hit, _ := hits["sections"].([]any)[0].(map[string]any)
+	if g, ok := hit["group"].(map[string]any); !ok || g["code"] != "B" || g["label"] == "" {
+		t.Errorf("section hit group = %v", hit["group"])
+	}
+	v := decode(t, get(t, h, "/api/vin/VSKBEC220U0990494"))
+	vehicle, _ := v["vehicle"].(map[string]any)
+	cat, _ := vehicle["catalog"].(map[string]any)
+	if vehicle["prodDate"] != "1989-05" || cat["from"] != "1987-04" {
+		t.Errorf("vehicle prodDate/catalog from = %v / %v", vehicle["prodDate"], cat["from"])
+	}
+	if langs, ok := cat["langs"].([]any); !ok || len(langs) != 2 {
+		t.Errorf("catalog langs = %v", cat["langs"])
+	}
+}
