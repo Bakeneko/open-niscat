@@ -15,11 +15,12 @@ export interface CartRow {
 
 export const MAX_ITEMS = 500
 const MAX_QTY = 9999
-const ID = /^[A-Z]{2}\d+$/
+const ID = /^([A-Z]{2})0*([1-9]\d*)$/
 
+/** Canonical line id ("aa02605" -> "AA2605", as the API returns it), or null when malformed. */
 export function normalizeId(id: string): string | null {
-  const u = id.trim().toUpperCase()
-  return ID.test(u) ? u : null
+  const m = ID.exec(id.trim().toUpperCase())
+  return m === null ? null : `${m[1] ?? ''}${m[2] ?? ''}`
 }
 
 export function addItem(

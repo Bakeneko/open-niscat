@@ -1,4 +1,4 @@
-import { ref, watch, type Ref } from 'vue'
+import { effectScope, ref, watch, type Ref } from 'vue'
 import { load, saveIfChanged } from '@/lib/storage'
 
 const instances = new Map<string, Ref<unknown>>()
@@ -16,12 +16,15 @@ export function useStored<T>(
   window.addEventListener('storage', (e) => {
     if (e.key === key || e.key === null) state.value = load(key, guard) ?? fallback()
   })
-  watch(
-    state,
-    (v) => {
-      saveIfChanged(key, v)
-    },
-    { deep: true },
-  )
+  // Detached scope: the watcher must outlive the component that happened to call first.
+  effectScope(true).run(() => {
+    watch(
+      state,
+      (v) => {
+        saveIfChanged(key, v)
+      },
+      { deep: true },
+    )
+  })
   return state
 }

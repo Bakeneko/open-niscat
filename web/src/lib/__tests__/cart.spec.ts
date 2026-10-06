@@ -16,6 +16,7 @@ import {
 describe('cart', () => {
   it('normalizes ids', () => {
     expect(normalizeId(' aa2605 ')).toBe('AA2605')
+    expect(normalizeId('AA02605')).toBe('AA2605') // the API answers with the canonical id
     expect(normalizeId('AA')).toBeNull()
     expect(normalizeId('A12')).toBeNull()
     expect(normalizeId('AA+3')).toBeNull()
