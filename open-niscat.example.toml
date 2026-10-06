@@ -1,0 +1,16 @@
+# Example configuration for open-niscat.
+# Copy it next to the binary as "open-niscat.toml" and adjust. Every key is optional;
+# command-line flags (--data, --addr, --open-browser, --default-lang) override this file.
+
+# Data directory: data.db, manifest.json, img/, gindex/, cinfo/.
+# A relative path is resolved against the directory of this file.
+data = "./data"
+
+# Listen address. Use "0.0.0.0:8080" to allow access from other machines on the local network.
+addr = "127.0.0.1:8080"
+
+# Open the default browser on startup.
+open_browser = true
+
+# Language offered on "/" when the browser has no stored preference: "en" or "fr".
+default_lang = "en"

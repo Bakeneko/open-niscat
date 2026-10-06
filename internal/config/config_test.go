@@ -68,6 +68,21 @@ func TestExplicitConfigFileAndRelativeData(t *testing.T) {
 	}
 }
 
+func TestExampleFileIsValid(t *testing.T) {
+	example := filepath.Join("..", "..", "open-niscat.example.toml")
+	cfg, err := config.Load([]string{"--config", example}, t.TempDir())
+	if err != nil {
+		t.Fatalf("open-niscat.example.toml must load: %v", err)
+	}
+	want, err := filepath.Abs(filepath.Join("..", "..", "data"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Data != want || cfg.Addr != "127.0.0.1:8080" || !cfg.OpenBrowser || cfg.DefaultLang != "en" {
+		t.Fatalf("example config = %+v", cfg)
+	}
+}
+
 func TestErrors(t *testing.T) {
 	base := t.TempDir()
 	cases := map[string]struct {
