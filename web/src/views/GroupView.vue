@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useDisplay } from 'vuetify'
@@ -30,7 +30,17 @@ const { data, error, loading, reload } = useFetch<GroupDetail>(() =>
   }),
 )
 
-const caption = ref<string | null>(null)
+// The viewer selects by hotspot key (caption without leading zeros); sections match on the caption itself.
+const selected = ref<string | null>(null)
+const caption = computed(
+  () => data.value?.hotspots.find((h) => h.key === selected.value)?.caption ?? null,
+)
+watch(
+  () => route.params.group,
+  () => {
+    selected.value = null
+  },
+)
 const showAll = ref(false)
 const sections = computed(() =>
   (data.value?.sections ?? []).filter(
@@ -63,15 +73,15 @@ const titles = computed(() => {
           <DrawingViewer
             :src="data.group.image"
             :hotspots="data.hotspots"
-            :selected="caption"
+            :selected="selected"
             :titles="titles"
             :style="{ height: mdAndUp ? 'calc(100vh - 160px)' : '60vh' }"
-            @select="(k) => (caption = caption === k ? null : k)"
+            @select="(k) => (selected = selected === k ? null : k)"
           />
         </v-col>
         <v-col cols="12" :md="data.group.image ? 5 : 12">
           <div class="d-flex align-center flex-wrap ga-2 mb-2">
-            <v-chip v-if="caption" closable @click:close="caption = null">{{
+            <v-chip v-if="caption" closable @click:close="selected = null">{{
               t('group.filtered', { caption })
             }}</v-chip>
             <v-switch

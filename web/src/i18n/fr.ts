@@ -70,6 +70,7 @@ export const fr: typeof en = {
     fit: 'Ajuster',
     zoomIn: 'Zoomer',
     zoomOut: 'Dézoomer',
+    noImage: 'Dessin indisponible.',
     group: 'Groupe',
   },
   part: {

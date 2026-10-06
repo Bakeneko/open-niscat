@@ -68,6 +68,7 @@ export const en = {
     fit: 'Fit',
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
+    noImage: 'Drawing not available.',
     group: 'Group',
   },
   part: {
