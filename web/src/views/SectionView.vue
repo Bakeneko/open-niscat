@@ -162,6 +162,7 @@ watch([selected, data], async ([key, s]) => {
             :hotspots="data.hotspots"
             :selected="selected"
             :titles="titles"
+            labels
             class="viewer-mobile"
             @select="select"
           />
@@ -177,6 +178,7 @@ watch([selected, data], async ([key, s]) => {
           :hotspots="data.hotspots"
           :selected="selected"
           :titles="titles"
+          labels
           @select="select"
         />
         <div class="split-side">

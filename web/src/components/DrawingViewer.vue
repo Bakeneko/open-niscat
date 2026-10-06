@@ -10,7 +10,7 @@ const props = defineProps<{
   hotspots: Hotspot[]
   selected: string | null
   titles?: Record<string, string>
-  /** Write captions over the drawing (group indexes: the printed numbers there are stale). */
+  /** Write captions over the drawing, hiding the printed numbers (as NISCAT does). */
   labels?: boolean
   /** Hotspot keys shown greyed out (e.g. sections not applicable to the vehicle). */
   muted?: string[]
@@ -200,7 +200,7 @@ watch(
         <span
           v-if="labels"
           class="caption"
-          :style="{ fontSize: `${String(Math.round(h.h * 0.7))}px` }"
+          :style="{ fontSize: `${String(Math.round(h.h * 0.6))}px` }"
           >{{ h.caption }}</span
         >
       </button>
@@ -252,28 +252,51 @@ watch(
   border-color: rgb(211, 47, 47);
   outline: none;
 }
+/* Labelled hotspots (group indexes), like NISCAT: the caption is written in red on an opaque white patch
+   hiding the stale printed number; the clickable zone itself stays invisible until hovered. */
 .hotspot.labelled {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* printed numbers start at the zone's left edge */
   padding: 0;
-  background: #fff;
+  border-color: transparent;
+  background: transparent;
+}
+.hotspot.labelled:hover,
+.hotspot.labelled:focus-visible {
+  border-color: transparent;
+}
+.hotspot.labelled:hover .caption,
+.hotspot.labelled:focus-visible .caption {
+  box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.6);
 }
 .hotspot .caption {
+  padding: 0.08em 0.25em;
+  border-radius: 3px;
+  background: #fff;
   color: rgb(211, 47, 47);
   font-weight: 700;
   line-height: 1;
   pointer-events: none;
 }
+.hotspot.labelled.muted {
+  border-color: transparent;
+}
+.hotspot.labelled.muted .caption {
+  color: rgb(150, 150, 150);
+  outline: 1px dashed rgb(150, 150, 150);
+}
+.hotspot.labelled.selected {
+  border-color: transparent;
+  background: transparent;
+}
+.hotspot.labelled.selected .caption {
+  color: rgb(var(--v-theme-primary));
+  box-shadow: 0 0 0 3px rgb(var(--v-theme-primary));
+}
 .hotspot.muted {
   border-style: dashed;
   border-color: rgba(120, 120, 120, 0.6);
-}
-.hotspot.muted .caption {
-  color: rgb(140, 140, 140);
-}
-.hotspot.selected .caption {
-  color: rgb(var(--v-theme-primary));
 }
 .hotspot.selected {
   border-color: rgb(var(--v-theme-primary));
