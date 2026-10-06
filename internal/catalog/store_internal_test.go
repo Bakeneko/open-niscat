@@ -98,3 +98,13 @@ func TestStoreIsReadOnly(t *testing.T) {
 		t.Fatal("INSERT succeeded after disabling query_only: the file is not opened read-only")
 	}
 }
+
+func TestAvailableLangs(t *testing.T) {
+	s := openInternal(t)
+	if got := s.availableLangs("AA"); !reflect.DeepEqual(got, []string{"en", "fr"}) {
+		t.Errorf("AA = %v", got)
+	}
+	if got := s.availableLangs("AB"); !reflect.DeepEqual(got, []string{"en"}) {
+		t.Errorf("AB = %v", got)
+	}
+}

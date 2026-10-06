@@ -23,11 +23,14 @@ func TestSectionWithVIN(t *testing.T) {
 	if sec.Applicable == nil || !*sec.Applicable || sec.Prev != "" || sec.Next != "" {
 		t.Fatalf("applicable/prev/next = %v %q %q", sec.Applicable, sec.Prev, sec.Next)
 	}
+	if sec.From == nil || *sec.From != "1987-04" || sec.To == nil || *sec.To != "1995-12" {
+		t.Errorf("section dates = %v %v", sec.From, sec.To)
+	}
 	if len(sec.Lines) != 3 || len(sec.Hotspots) != 3 {
 		t.Fatalf("lines=%d hotspots=%d", len(sec.Lines), len(sec.Hotspots))
 	}
 	l1, l2, l3 := sec.Lines[0], sec.Lines[1], sec.Lines[2]
-	if l1.ID != "AA1" || l1.Description != "TENDEUR" || l1.Period != "04/87-04/87" || l1.InPeriod == nil || *l1.InPeriod {
+	if l1.ID != "AA1" || l1.Description != "TENDEUR" || l1.From == nil || *l1.From != "1987-04" || l1.To == nil || *l1.To != "1987-04" || l1.InPeriod == nil || *l1.InPeriod {
 		t.Errorf("line 1 = %+v", l1)
 	}
 	if l2.Item != "" || l2.ItemKey != "1" || l2.Level != 2 || l2.Cap != "10" || l2.InPeriod == nil || !*l2.InPeriod {

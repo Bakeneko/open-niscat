@@ -187,6 +187,17 @@ func (s *Store) langFilter(alias string, want Lang) (cond string, args []any) {
 	return cond, args
 }
 
+// availableLangs lists the data languages present for a series, in display order.
+func (s *Store) availableLangs(etd string) []string {
+	out := []string{}
+	for _, l := range []string{"en", "fr", "es", "de", "it"} {
+		if s.langs[etd][l] {
+			out = append(out, l)
+		}
+	}
+	return out
+}
+
 // fileURL returns the public URL of a data file, or "" if it does not exist.
 func (s *Store) fileURL(kind, etd, name string) string {
 	rel := path.Join(kind, etd, name)

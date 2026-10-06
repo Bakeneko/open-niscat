@@ -95,18 +95,6 @@ func (p Period) Contains(yyyymm int) bool {
 	return (p.From == 0 || yyyymm >= p.From) && (p.To == 0 || yyyymm <= p.To)
 }
 
-// String formats the period as "MM/YY-MM/YY", leaving open bounds empty.
-func (p Period) String() string {
-	return formatMMYY(p.From) + "-" + formatMMYY(p.To)
-}
-
-func formatMMYY(v int) string {
-	if v == 0 {
-		return ""
-	}
-	return fmt.Sprintf("%02d/%02d", v%100, v/100%100)
-}
-
 // ParseYYYYMM parses a production date such as "198905".
 func ParseYYYYMM(s string) (int, bool) {
 	if len(s) != 6 {
@@ -119,9 +107,31 @@ func ParseYYYYMM(s string) (int, bool) {
 	return n, true
 }
 
-// FormatYYYYMM formats 198905 as "05/1989".
-func FormatYYYYMM(v int) string {
-	return fmt.Sprintf("%02d/%04d", v%100, v/100)
+// yearMonth formats 198905 as "1989-05" for the API; nil for an unknown or open bound.
+func yearMonth(v int) *string {
+	if v == 0 {
+		return nil
+	}
+	s := fmt.Sprintf("%04d-%02d", v/100, v%100)
+	return &s
+}
+
+// parseMonthYear parses catalog and section dates "MM/YY" or "MM-YY".
+func parseMonthYear(s string) (int, bool) {
+	s = strings.TrimSpace(s)
+	if len(s) != 5 || (s[2] != '/' && s[2] != '-') {
+		return 0, false
+	}
+	return parseMMYY(s[:2] + s[3:])
+}
+
+// yearMonthOf converts a "MM/YY" or "MM-YY" date to the API format; nil when absent or malformed.
+func yearMonthOf(s string) *string {
+	v, ok := parseMonthYear(s)
+	if !ok {
+		return nil
+	}
+	return yearMonth(v)
 }
 
 func reverse(s string) string {

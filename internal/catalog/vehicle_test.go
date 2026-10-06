@@ -20,8 +20,14 @@ func TestCatalogs(t *testing.T) {
 	if len(cats) != 3 || cats[0].Cat != "AA-G01" || cats[1].Cat != "AB-G01" || cats[2].Cat != "AA-G02" {
 		t.Fatalf("catalogs = %+v", cats)
 	}
-	if !reflect.DeepEqual(cats[0].Langs, []string{"es", "en", "de", "fr"}) || cats[0].Description != "0049 TEST" {
+	if cats[0].Description != "0049 TEST" {
 		t.Fatalf("AA = %+v", cats[0])
+	}
+	if cats[0].From == nil || *cats[0].From != "1987-04" || cats[0].To == nil || *cats[0].To != "1994-11" {
+		t.Fatalf("AA dates = %v %v", cats[0].From, cats[0].To)
+	}
+	if !reflect.DeepEqual(cats[0].Langs, []string{"en", "fr"}) || !reflect.DeepEqual(cats[1].Langs, []string{"en"}) {
+		t.Fatalf("langs from data = %v / %v", cats[0].Langs, cats[1].Langs)
 	}
 	if _, err := s.Catalog(ctx, "ZZ", "G01"); !errors.Is(err, catalog.ErrNotFound) {
 		t.Fatalf("unknown catalog: %v", err)
@@ -38,7 +44,7 @@ func TestIdentifyVINExactWithAttributesInFrench(t *testing.T) {
 	if v == nil || res.Candidates != nil {
 		t.Fatalf("expected a vehicle, got %+v", res)
 	}
-	if v.VIN != "VSKBEC220U0990494" || v.Model != "BELC220QSKVX" || v.ProdDate != "05/1989" || v.Catalog.Cat != "AA-G01" {
+	if v.VIN != "VSKBEC220U0990494" || v.Model != "BELC220QSKVX" || v.ProdDate != "1989-05" || v.Catalog.Cat != "AA-G01" {
 		t.Fatalf("vehicle = %+v", v)
 	}
 	want := []catalog.Attribute{
@@ -63,7 +69,7 @@ func TestIdentifyVINTail(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []catalog.VINMatch{{VIN: "116U0520133", Model: "BELC220QSKVX", Cat: "AA-G01", ProdDate: "07/1987"}}
+	want := []catalog.VINMatch{{VIN: "116U0520133", Model: "BELC220QSKVX", Cat: "AA-G01", ProdDate: ptr("1987-07")}}
 	if res.Vehicle != nil || !reflect.DeepEqual(res.Candidates, want) {
 		t.Fatalf("result = %+v", res)
 	}
@@ -152,3 +158,5 @@ func TestModels(t *testing.T) {
 		t.Fatalf("attributes = %+v", models[0].Attributes)
 	}
 }
+
+func ptr(s string) *string { return &s }

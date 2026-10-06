@@ -25,8 +25,8 @@ type Line struct {
 	Cap            string   `json:"cap"`
 	ICA            string   `json:"ica"`
 	App            string   `json:"app"`
-	Dataplic       string   `json:"dataplic"`
-	Period         string   `json:"period"`
+	From           *string  `json:"from"`
+	To             *string  `json:"to"`
 	InPeriod       *bool    `json:"inPeriod,omitempty"`
 	Alternative    string   `json:"alternative"`
 	AlternativeKey string   `json:"alternativeKey"`
@@ -51,8 +51,8 @@ type Section struct {
 	Group      Group     `json:"group"`
 	Name       string    `json:"name"`
 	Notes      string    `json:"notes"`
-	From       string    `json:"from"`
-	To         string    `json:"to"`
+	From       *string   `json:"from"`
+	To         *string   `json:"to"`
 	Applicable *bool     `json:"applicable,omitempty"`
 	Image      string    `json:"image"`
 	Hotspots   []Hotspot `json:"hotspots"`
@@ -78,7 +78,7 @@ func scanLine(rows *sql.Rows) (LineRef, error) {
 		ID: fmt.Sprintf("%s%d", str(etd), pospie), Pospie: pospie, Mark: str(mark), Item: str(item),
 		ItemKey: ItemKey(str(itemEff)), Variant: str(variant),
 		PartNo: str(f[0]), PartKey: str(f[1]), Description: str(f[2]), Spec: str(f[3]), Qty: str(f[4]), Cap: str(f[5]),
-		ICA: str(f[6]), App: str(f[7]), Dataplic: str(f[8]), Alternative: str(f[9]), AlternativeKey: str(f[10]),
+		ICA: str(f[6]), App: str(f[7]), Alternative: str(f[9]), AlternativeKey: str(f[10]),
 		KD: str(f[11]), PNC: str(f[12]),
 	}
 	for i := range ind {
@@ -87,8 +87,8 @@ func scanLine(rows *sql.Rows) (LineRef, error) {
 			break
 		}
 	}
-	if p, ok := ParsePeriod(l.Dataplic); ok {
-		l.Period, l.period = p.String(), &p
+	if p, ok := ParsePeriod(str(f[8])); ok {
+		l.From, l.To, l.period = yearMonth(p.From), yearMonth(p.To), &p
 	}
 	return LineRef{Etd: str(etd), Sec: strings.TrimPrefix(str(plate), str(etd)), Line: l}, nil
 }
@@ -109,7 +109,7 @@ func (s *Store) Section(ctx context.Context, etd, sec string, sc *Scope, lang La
 		return Section{}, fmt.Errorf("look up section: %w", err)
 	}
 	out := Section{
-		Etd: etd, Sec: sec, Plate: etd + sec, Name: str(name), Notes: str(notes), From: str(from), To: str(to),
+		Etd: etd, Sec: sec, Plate: etd + sec, Name: str(name), Notes: str(notes), From: yearMonthOf(str(from)), To: yearMonthOf(str(to)),
 		Image: s.fileURL("img", etd, etd+sec+".png"),
 	}
 	if out.Group, err = s.group(ctx, etd, str(code), lang); err != nil {

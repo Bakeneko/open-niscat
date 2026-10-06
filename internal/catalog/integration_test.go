@@ -42,7 +42,7 @@ func TestRealVanetteIdentification(t *testing.T) {
 		t.Fatal(err)
 	}
 	v := res.Vehicle
-	if v.Catalog.Cat != "AA-G01" || v.Model != "BELC220QSKVX" || v.ProdDate != "05/1989" || v.VINCount != 8047 {
+	if v.Catalog.Cat != "AA-G01" || v.Model != "BELC220QSKVX" || v.ProdDate != "1989-05" || v.VINCount != 8047 {
 		t.Fatalf("vehicle = %+v", v)
 	}
 	want := []string{"LD20", "SHORT", "5 DOOR", "STANDARD", "5 SPEED", "VAN", "VANETTE C220", "VAN", "SPAIN"}
@@ -57,8 +57,8 @@ func TestRealPatrolAndCabstarIdentification(t *testing.T) {
 		vin, cat, model, date string
 		first                 []string
 	}{
-		{"VSKAVU260U0618518", "AC-G02", "AVPULQF260TPAA---ASPA", "11/2000", []string{"HIGH ROOF VAN", "TD27T", "LONG WHEELBASE"}},
-		{"VWASBFTL01A142282", "AL-G01", "SBC3LQFTL0CQG8Q6-3ITA", "05/2001", []string{"FIX CAB", "BD30TI", "3500KG", "EUROPE", "GENERAL", "LONG (3400MM)"}},
+		{"VSKAVU260U0618518", "AC-G02", "AVPULQF260TPAA---ASPA", "2000-11", []string{"HIGH ROOF VAN", "TD27T", "LONG WHEELBASE"}},
+		{"VWASBFTL01A142282", "AL-G01", "SBC3LQFTL0CQG8Q6-3ITA", "2001-05", []string{"FIX CAB", "BD30TI", "3500KG", "EUROPE", "GENERAL", "LONG (3400MM)"}},
 	}
 	for _, tc := range cases {
 		res, err := s.IdentifyVIN(ctx, tc.vin, catalog.LangEN)

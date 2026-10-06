@@ -65,7 +65,7 @@ func TestSearchPagination(t *testing.T) {
 func TestSearchSections(t *testing.T) {
 	s := openFixture(t)
 	r, err := s.Search(ctx, catalog.SearchQuery{Q: "alternateur", Kind: catalog.SearchSections}, nil, catalog.LangFR)
-	if err != nil || r.Total != 3 || r.Sections[0].Sec != "230" || r.Sections[0].Group != "B" {
+	if err != nil || r.Total != 3 || r.Sections[0].Sec != "230" || r.Sections[0].Group.Code != "B" || r.Sections[0].Group.Label != "SYSTEME ELECTRIQUE MOTEUR" {
 		t.Fatalf("sections = %+v, %v", r, err)
 	}
 	r, err = s.Search(ctx, catalog.SearchQuery{Q: "ALTÉRNATEUR fixation", Kind: catalog.SearchSections}, nil, catalog.LangFR)

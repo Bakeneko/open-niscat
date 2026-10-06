@@ -65,19 +65,13 @@ func TestParsePeriod(t *testing.T) {
 	}
 }
 
-func TestPeriodContainsAndString(t *testing.T) {
+func TestPeriodContains(t *testing.T) {
 	p := Period{198704, 199206}
 	if !p.Contains(198704) || !p.Contains(199206) || p.Contains(198703) || p.Contains(199207) {
 		t.Error("bounds must be inclusive")
 	}
 	if !(Period{0, 198802}).Contains(195001) || !(Period{199411, 0}).Contains(203001) {
 		t.Error("open bounds must contain everything on their side")
-	}
-	cases := map[Period]string{{198704, 199206}: "04/87-06/92", {0, 198802}: "-02/88", {199411, 0}: "11/94-"}
-	for p, want := range cases {
-		if got := p.String(); got != want {
-			t.Errorf("%+v.String() = %q, want %q", p, got, want)
-		}
 	}
 }
 
@@ -90,13 +84,39 @@ func TestYYYYMM(t *testing.T) {
 			t.Errorf("ParseYYYYMM(%q) should fail", bad)
 		}
 	}
-	if got := FormatYYYYMM(198905); got != "05/1989" {
-		t.Errorf("FormatYYYYMM = %q", got)
-	}
 }
 
 func TestReverse(t *testing.T) {
 	if got := reverse("VSKBEC220U0990494"); got != "4940990U022CEBKSV" {
 		t.Errorf("reverse = %q", got)
+	}
+}
+
+func TestYearMonthAndParseMonthYear(t *testing.T) {
+	if got := yearMonth(198905); got == nil || *got != "1989-05" {
+		t.Errorf("yearMonth(198905) = %v", got)
+	}
+	if yearMonth(0) != nil {
+		t.Error("yearMonth(0) must be nil")
+	}
+	cases := []struct {
+		in   string
+		want int
+		ok   bool
+	}{
+		{"04/87", 198704, true},
+		{"04-87", 198704, true},
+		{" 03/93", 199303, true},
+		{"12/15", 201512, true},
+		{"", 0, false},
+		{"13/87", 0, false},
+		{"0487", 0, false},
+		{"04/1987", 0, false},
+	}
+	for _, tc := range cases {
+		got, ok := parseMonthYear(tc.in)
+		if got != tc.want || ok != tc.ok {
+			t.Errorf("parseMonthYear(%q) = %d, %v", tc.in, got, ok)
+		}
 	}
 }

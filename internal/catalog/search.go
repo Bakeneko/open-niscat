@@ -3,6 +3,7 @@ package catalog
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"sort"
 	"strconv"
@@ -53,7 +54,7 @@ type SearchQuery struct {
 type SectionHit struct {
 	Etd   string `json:"etd"`
 	Sec   string `json:"sec"`
-	Group string `json:"group"`
+	Group Group  `json:"group"`
 	Name  string `json:"name"`
 	Notes string `json:"notes"`
 }
@@ -244,12 +245,37 @@ func (s *Store) searchSections(ctx context.Context, q string, sc *Scope, applica
 		if err := rows.Scan(&f[0], &f[1], &f[2], &f[3], &f[4]); err != nil {
 			return nil, fmt.Errorf("search sections: %w", err)
 		}
-		out = append(out, SectionHit{Etd: str(f[0]), Sec: str(f[1]), Group: str(f[2]), Name: str(f[3]), Notes: str(f[4])})
+		out = append(out, SectionHit{Etd: str(f[0]), Sec: str(f[1]), Group: Group{Code: str(f[2])}, Name: str(f[3]), Notes: str(f[4])})
 	}
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("search sections: %w", err)
 	}
-	return out, nil
+	if err := rows.Close(); err != nil {
+		return nil, fmt.Errorf("search sections: %w", err)
+	}
+	return out, s.labelGroups(ctx, out, lang)
+}
+
+// labelGroups fills the group labels of section hits, falling back to the code for an unknown group.
+func (s *Store) labelGroups(ctx context.Context, hits []SectionHit, lang Lang) error {
+	cache := map[string]Group{}
+	for i := range hits {
+		h := &hits[i]
+		k := h.Etd + "/" + h.Group.Code
+		g, ok := cache[k]
+		if !ok {
+			var err error
+			g, err = s.group(ctx, h.Etd, h.Group.Code, lang)
+			if errors.Is(err, ErrNotFound) {
+				g = Group{Code: h.Group.Code, Label: h.Group.Code}
+			} else if err != nil {
+				return err
+			}
+			cache[k] = g
+		}
+		h.Group = g
+	}
+	return nil
 }
 
 // parseLineID splits "AA2605" into "AA" and 2605.

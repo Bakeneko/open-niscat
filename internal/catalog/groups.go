@@ -27,12 +27,12 @@ type Hotspot struct {
 
 // SectionSummary is a section in a list. Applicable is nil when the scope cannot filter.
 type SectionSummary struct {
-	Sec        string `json:"sec"`
-	Name       string `json:"name"`
-	Notes      string `json:"notes"`
-	From       string `json:"from"`
-	To         string `json:"to"`
-	Applicable *bool  `json:"applicable,omitempty"`
+	Sec        string  `json:"sec"`
+	Name       string  `json:"name"`
+	Notes      string  `json:"notes"`
+	From       *string `json:"from"`
+	To         *string `json:"to"`
+	Applicable *bool   `json:"applicable,omitempty"`
 }
 
 // GroupDetail is a group index: drawing hotspots (captions are section numbers) and sections.
@@ -185,7 +185,7 @@ func (s *Store) groupSections(ctx context.Context, etd, grupo, code string, lang
 		if err := rows.Scan(&f[0], &f[1], &f[2], &f[3], &f[4]); err != nil {
 			return nil, fmt.Errorf("group sections: %w", err)
 		}
-		out = append(out, SectionSummary{Sec: str(f[0]), Name: str(f[1]), Notes: str(f[2]), From: str(f[3]), To: str(f[4])})
+		out = append(out, SectionSummary{Sec: str(f[0]), Name: str(f[1]), Notes: str(f[2]), From: yearMonthOf(str(f[3])), To: yearMonthOf(str(f[4]))})
 	}
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("group sections: %w", err)

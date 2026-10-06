@@ -19,8 +19,8 @@ type Info struct {
 	Model       string   `json:"model"`
 	CModel      string   `json:"cmodel"`
 	Drive       string   `json:"drive"`
-	From        string   `json:"from"`
-	To          string   `json:"to"`
+	From        *string  `json:"from"`
+	To          *string  `json:"to"`
 	Serie       string   `json:"serie"`
 	Description string   `json:"description"`
 	Langs       []string `json:"langs"`
@@ -48,10 +48,10 @@ type Vehicle struct {
 
 // VINMatch is a candidate returned by a search on the end of the VIN.
 type VINMatch struct {
-	VIN      string `json:"vin"`
-	Model    string `json:"model"`
-	Cat      string `json:"cat"`
-	ProdDate string `json:"prodDate"`
+	VIN      string  `json:"vin"`
+	Model    string  `json:"model"`
+	Cat      string  `json:"cat"`
+	ProdDate *string `json:"prodDate"`
 }
 
 // VINResult holds either the identified vehicle or candidates.
@@ -71,19 +71,17 @@ const catalogColumns = "etd, grupo, model, cmodel, drive, date_from, date_to, se
 
 type scanner interface{ Scan(dest ...any) error }
 
-func scanCatalog(row scanner) (Info, error) {
+func (s *Store) scanCatalog(row scanner) (Info, error) {
 	var f [10]sql.NullString
 	if err := row.Scan(&f[0], &f[1], &f[2], &f[3], &f[4], &f[5], &f[6], &f[7], &f[8], &f[9]); err != nil {
 		return Info{}, fmt.Errorf("scan catalog: %w", err)
 	}
 	info := Info{
 		Etd: str(f[0]), Grupo: str(f[1]), Model: str(f[2]), CModel: str(f[3]), Drive: str(f[4]),
-		From: str(f[5]), To: str(f[6]), Serie: str(f[7]), Description: str(f[8]), Langs: []string{},
+		From: yearMonthOf(str(f[5])), To: yearMonthOf(str(f[6])), Serie: str(f[7]), Description: str(f[8]),
 	}
 	info.Cat = info.Etd + "-" + info.Grupo
-	if l := str(f[9]); l != "" {
-		info.Langs = strings.Split(l, ",")
-	}
+	info.Langs = s.availableLangs(info.Etd)
 	return info, nil
 }
 
@@ -96,7 +94,7 @@ func (s *Store) Catalogs(ctx context.Context) ([]Info, error) {
 	defer rows.Close()
 	out := []Info{}
 	for rows.Next() {
-		info, err := scanCatalog(rows)
+		info, err := s.scanCatalog(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -111,7 +109,7 @@ func (s *Store) Catalogs(ctx context.Context) ([]Info, error) {
 // Catalog returns one catalogue.
 func (s *Store) Catalog(ctx context.Context, etd, grupo string) (Info, error) {
 	row := s.db.QueryRowContext(ctx, "SELECT "+catalogColumns+" FROM catalog WHERE etd = ? AND grupo = ?", etd, grupo)
-	info, err := scanCatalog(row)
+	info, err := s.scanCatalog(row)
 	if errors.Is(err, sql.ErrNoRows) {
 		return Info{}, fmt.Errorf("%w: catalog %s-%s", ErrNotFound, etd, grupo)
 	}
@@ -271,7 +269,7 @@ func (s *Store) Vehicle(ctx context.Context, sc *Scope, lang Lang) (Vehicle, err
 	}
 	v := Vehicle{VIN: sc.VIN, Model: sc.Model, Catalog: info, Attributes: []Attribute{}}
 	if sc.ProdDate > 0 {
-		v.ProdDate = FormatYYYYMM(sc.ProdDate)
+		v.ProdDate = *yearMonth(sc.ProdDate)
 	}
 	if sc.Model != "" {
 		if v.Attributes, err = s.attributes(ctx, sc.Etd, sc.Grupo, sc.values[:], lang); err != nil {
@@ -363,7 +361,7 @@ func (s *Store) vinsEndingWith(ctx context.Context, tail string) ([]VINMatch, er
 		}
 		m := VINMatch{VIN: str(f[0]), Model: str(f[1]), Cat: str(f[2]) + "-" + str(f[4])}
 		if d, ok := ParseYYYYMM(str(f[3])); ok {
-			m.ProdDate = FormatYYYYMM(d)
+			m.ProdDate = yearMonth(d)
 		}
 		out = append(out, m)
 	}
