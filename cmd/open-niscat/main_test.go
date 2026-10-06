@@ -5,7 +5,10 @@ import (
 	"errors"
 	"flag"
 	"net"
+	"strings"
 	"testing"
+
+	"open-niscat/internal/catalog/catalogtest"
 )
 
 func TestBrowserURL(t *testing.T) {
@@ -22,6 +25,19 @@ func TestBrowserURL(t *testing.T) {
 		if got := browserURL(addr); got != want {
 			t.Errorf("browserURL(%s) = %q, want %q", in, got, want)
 		}
+	}
+}
+
+func TestPortInUseExplainsWhatToDo(t *testing.T) {
+	busy, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer busy.Close()
+	addr := busy.Addr().String()
+	err = run(context.Background(), []string{"--data", catalogtest.NewDataDir(t), "--addr", addr, "--open-browser=false"})
+	if err == nil || !strings.Contains(err.Error(), "already running") || !strings.Contains(err.Error(), "http://"+addr+"/") {
+		t.Fatalf("run on a busy port = %v, want a hint that open-niscat may already be running at http://%s/", err, addr)
 	}
 }
 

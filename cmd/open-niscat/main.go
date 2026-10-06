@@ -27,6 +27,7 @@ func main() {
 	stop()
 	if err != nil && !errors.Is(err, flag.ErrHelp) {
 		fmt.Fprintln(os.Stderr, "open-niscat:", err)
+		pauseIfOwnConsole()
 	}
 	os.Exit(exitCode(err))
 }
@@ -60,7 +61,11 @@ func run(ctx context.Context, args []string) error {
 
 	listener, err := (&net.ListenConfig{}).Listen(ctx, "tcp", cfg.Addr)
 	if err != nil {
-		return fmt.Errorf("listen on %s: %w", cfg.Addr, err)
+		hint := "is the address valid?"
+		if addr, resolveErr := net.ResolveTCPAddr("tcp", cfg.Addr); resolveErr == nil {
+			hint = "if open-niscat is already running, open " + browserURL(addr) + " in your browser"
+		}
+		return fmt.Errorf("cannot listen on %s (%s): %w", cfg.Addr, hint, err)
 	}
 	srv := &http.Server{Handler: api.New(store, web.Dist(), lang), ReadHeaderTimeout: 10 * time.Second}
 	url := browserURL(listener.Addr())
