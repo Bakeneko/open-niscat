@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
+import { mdiCarArrowRight, mdiCheck, mdiClose } from '@mdi/js'
+import { useRoute, useRouter } from 'vue-router'
 import { apiPath } from '@/api/client'
 import type { Group, Vehicle } from '@/api/types'
 import ErrorAlert from '@/components/ErrorAlert.vue'
@@ -18,7 +19,14 @@ const route = useRoute()
 const lang = useLang()
 const links = useLinks()
 const history = useHistory()
-const { current } = useScope()
+const router = useRouter()
+const { current, isSaved, adopt, clear } = useScope()
+
+// A vehicle opened from someone else's link must not wipe the user's own saved vehicle.
+function remove() {
+  if (isSaved.value) clear()
+  void router.push(links.to('/', {}, false))
+}
 
 const vehicle = useFetch<Vehicle>(() =>
   current.value === null
@@ -48,6 +56,20 @@ watch(vehicle.data, (v) => {
     <v-progress-linear v-if="vehicle.loading.value || groups.loading.value" indeterminate />
     <ErrorAlert :error="vehicle.error.value" @retry="vehicle.reload" />
     <ErrorAlert :error="groups.error.value" @retry="groups.reload" />
+    <div v-if="vehicle.data.value" class="d-flex flex-wrap ga-2 mb-3 no-print">
+      <v-btn
+        v-if="current && !isSaved"
+        :prepend-icon="mdiCheck"
+        color="primary"
+        :title="t('scope.fromLink')"
+        @click="adopt()"
+        >{{ t('scope.use') }}</v-btn
+      >
+      <v-btn :prepend-icon="mdiCarArrowRight" variant="tonal" :to="links.to('/', {}, false)">{{
+        t('scope.change')
+      }}</v-btn>
+      <v-btn :prepend-icon="mdiClose" variant="text" @click="remove">{{ t('scope.clear') }}</v-btn>
+    </div>
     <VehicleCard v-if="vehicle.data.value" :vehicle="vehicle.data.value" class="mb-4" />
     <h2 v-if="groups.data.value" class="text-subtitle-1 mb-2">{{ t('vehicle.groups') }}</h2>
     <v-row v-if="groups.data.value && cat" dense>

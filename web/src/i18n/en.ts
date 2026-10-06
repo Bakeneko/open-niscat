@@ -25,6 +25,7 @@ export const en = {
   scope: {
     none: 'No vehicle',
     choose: 'Choose a vehicle',
+    change: 'Change vehicle',
     use: 'Use this vehicle',
     clear: 'Remove vehicle',
     saved: 'Remembered vehicle',

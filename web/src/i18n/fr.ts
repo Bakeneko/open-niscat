@@ -27,6 +27,7 @@ export const fr: typeof en = {
   scope: {
     none: 'Aucun véhicule',
     choose: 'Choisir un véhicule',
+    change: 'Changer de véhicule',
     use: 'Utiliser ce véhicule',
     clear: 'Retirer le véhicule',
     saved: 'Véhicule mémorisé',
