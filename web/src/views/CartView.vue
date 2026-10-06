@@ -123,7 +123,7 @@ function removeMissing() {
     <div class="d-flex align-center flex-wrap ga-2 mb-2">
       <h1 class="text-h6">{{ shared ? t('cart.shared') : t('cart.title') }}</h1>
       <v-spacer />
-      <template v-if="shared">
+      <template v-if="shared && shared.items.length > 0">
         <v-btn color="primary" class="no-print" @click="adoptShared('replace')">{{
           t('cart.replace')
         }}</v-btn>

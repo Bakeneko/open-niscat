@@ -72,4 +72,17 @@ router.beforeEach(async (to) => {
   return true
 })
 
+// After a binary upgrade an open tab still references old hashed chunks, which now answer 404: load the
+// target page in full once (the reload fetches the new index.html).
+router.onError((err: unknown, to) => {
+  if (!/dynamically imported module|Importing a module script failed/i.test(String(err))) return
+  try {
+    if (sessionStorage.getItem('open-niscat.reload') === to.fullPath) return
+    sessionStorage.setItem('open-niscat.reload', to.fullPath)
+  } catch {
+    return
+  }
+  window.location.assign(to.fullPath)
+})
+
 export default router
