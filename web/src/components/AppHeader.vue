@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { mdiCart, mdiMagnify } from '@mdi/js'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useCart } from '@/composables/useCart'
 import { useLang } from '@/composables/useLang'
 import { useLinks } from '@/composables/useLinks'
-import { isLang, switchLang, type Lang } from '@/lib/lang'
+import { switchLang, type Lang } from '@/lib/lang'
 import { saveIfChanged } from '@/lib/storage'
 import ScopeChip from './ScopeChip.vue'
 
@@ -18,12 +18,18 @@ const lang = useLang()
 const links = useLinks()
 const cart = useCart()
 const q = ref('')
+const langs: readonly Lang[] = ['en', 'fr']
 
-function setLang(v: unknown) {
-  if (!isLang(v)) return
-  const next: Lang = v
-  saveIfChanged('open-niscat.lang', next)
-  void router.push(switchLang(route.fullPath, next))
+watch(
+  () => route.query.q,
+  (v) => {
+    q.value = typeof v === 'string' ? v : ''
+  },
+  { immediate: true },
+)
+
+function rememberLang(l: Lang) {
+  saveIfChanged('open-niscat.lang', l)
 }
 
 function search() {
@@ -42,6 +48,7 @@ function search() {
       v-model="q"
       :prepend-inner-icon="mdiMagnify"
       :placeholder="t('search.placeholder')"
+      :aria-label="t('home.searchLabel')"
       density="compact"
       variant="solo-filled"
       flat
@@ -50,18 +57,30 @@ function search() {
       class="header-search mx-2"
       @keyup.enter="search"
     />
-    <v-btn-toggle
-      :model-value="lang"
-      density="compact"
-      mandatory
-      variant="outlined"
-      class="mx-1"
-      @update:model-value="setLang"
+    <v-btn
+      icon
+      class="header-search-btn"
+      :to="links.to('/search')"
+      :title="t('home.searchLabel')"
+      :aria-label="t('home.searchLabel')"
     >
-      <v-btn value="en">EN</v-btn>
-      <v-btn value="fr">FR</v-btn>
-    </v-btn-toggle>
-    <v-btn icon :title="t('nav.cart')" @click="emit('cart')">
+      <v-icon :icon="mdiMagnify" />
+    </v-btn>
+    <div class="mx-1 d-flex">
+      <v-btn
+        v-for="l in langs"
+        :key="l"
+        :to="switchLang(route.fullPath, l)"
+        :active="lang === l"
+        :variant="lang === l ? 'tonal' : 'text'"
+        density="compact"
+        min-width="0"
+        @click="rememberLang(l)"
+      >
+        {{ l.toUpperCase() }}
+      </v-btn>
+    </div>
+    <v-btn icon :title="t('nav.cart')" :aria-label="t('nav.cart')" @click="emit('cart')">
       <v-badge :content="cart.count.value" :model-value="cart.count.value > 0" color="primary">
         <v-icon :icon="mdiCart" />
       </v-badge>

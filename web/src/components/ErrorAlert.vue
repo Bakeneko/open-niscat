@@ -13,7 +13,8 @@ const text = computed(() => {
   if (e instanceof ApiError) {
     const known = ['not_found', 'invalid', 'internal'] as const
     const code = known.find((k) => k === e.code)
-    return code === undefined ? e.message : `${t(`error.${code}`)} ${e.message}`
+    if (code !== undefined) return `${t(`error.${code}`)} ${e.message}`
+    return e.message === '' ? `${t('error.internal')} (HTTP ${String(e.status)})` : e.message
   }
   return t('error.network')
 })

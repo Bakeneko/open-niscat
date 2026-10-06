@@ -6,9 +6,15 @@
 .header-search {
   max-width: 420px;
 }
+.header-search-btn {
+  display: none;
+}
 @media (max-width: 600px) {
   .header-search {
     display: none;
+  }
+  .header-search-btn {
+    display: inline-flex;
   }
   .scope-chip {
     max-width: 40vw;

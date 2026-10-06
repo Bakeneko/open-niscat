@@ -17,7 +17,8 @@ const shown = computed(() => current.value ?? saved.value)
 const label = computed(() => (shown.value === null ? t('scope.none') : scopeLabel(shown.value)))
 
 function remove() {
-  clear()
+  // A vehicle opened from someone else's link must not wipe the user's own saved vehicle.
+  if (current.value === null || isSaved.value) clear()
   const query = { ...route.query }
   delete query.vin
   delete query.cat
