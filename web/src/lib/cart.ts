@@ -22,7 +22,12 @@ export function normalizeId(id: string): string | null {
   return ID.test(u) ? u : null
 }
 
-export function addItem(items: readonly CartItem[], id: string, qty = 1, scope?: Scope): CartItem[] {
+export function addItem(
+  items: readonly CartItem[],
+  id: string,
+  qty = 1,
+  scope?: Scope,
+): CartItem[] {
   const nid = normalizeId(id)
   if (nid === null || !Number.isInteger(qty) || qty <= 0) return [...items]
   if (items.some((i) => i.id === nid)) {
@@ -85,14 +90,17 @@ export function isCart(v: unknown): v is CartItem[] {
   return Array.isArray(v) && v.every(isItem)
 }
 
-const cells = (r: CartRow) => [r.reference, r.description, String(r.qty), r.section]
+// Spreadsheets evaluate cells starting with = + - @ ("-23319-D9700" would become a formula): wrap them as ="...".
+const asText = (s: string) => (/^[=+\-@]/.test(s) ? `="${s.replace(/"/g, '""')}"` : s)
+const cells = (r: CartRow) => [r.reference, r.description, String(r.qty), r.section].map(asText)
+
+const clean = (s: string) => s.replace(/[\t\r\n]+/g, ' ')
+const quote = (s: string) => (/[";\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s)
 
 export function toTSV(headers: readonly string[], rows: readonly CartRow[]): string {
-  const clean = (s: string) => s.replace(/[\t\r\n]+/g, ' ')
   return [headers, ...rows.map(cells)].map((r) => r.map(clean).join('\t')).join('\r\n')
 }
 
 export function toCSV(headers: readonly string[], rows: readonly CartRow[]): string {
-  const quote = (s: string) => (/[";\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s)
   return [headers, ...rows.map(cells)].map((r) => r.map(quote).join(';')).join('\r\n') + '\r\n'
 }

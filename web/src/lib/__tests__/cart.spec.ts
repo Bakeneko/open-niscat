@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import {
-  MAX_ITEMS, addItem, decodeCart, encodeCart, isCart, mergeItems, normalizeId, removeItem, setQty, toCSV, toTSV,
+  MAX_ITEMS,
+  addItem,
+  decodeCart,
+  encodeCart,
+  isCart,
+  mergeItems,
+  normalizeId,
+  removeItem,
+  setQty,
+  toCSV,
+  toTSV,
 } from '../cart'
 
 describe('cart', () => {
@@ -27,7 +37,10 @@ describe('cart', () => {
     expect(items).toHaveLength(MAX_ITEMS)
   })
   it('encodes and decodes share links, reporting junk', () => {
-    const items = [{ id: 'AA2605', qty: 2 }, { id: 'AA5658', qty: 8 }]
+    const items = [
+      { id: 'AA2605', qty: 2 },
+      { id: 'AA5658', qty: 8 },
+    ]
     expect(encodeCart(items)).toBe('AA2605x2,AA5658x8')
     expect(decodeCart('AA2605x2,aa5658x8')).toEqual({ items, invalid: [] })
     expect(decodeCart('AA2605x2,AA2605x1,ZZ,AA1x0,,AA7x99999')).toEqual({
@@ -37,7 +50,15 @@ describe('cart', () => {
     expect(decodeCart('')).toEqual({ items: [], invalid: [] })
   })
   it('merges carts', () => {
-    expect(mergeItems([{ id: 'AA1', qty: 1 }], [{ id: 'AA1', qty: 2 }, { id: 'AB2', qty: 1 }])).toEqual([
+    expect(
+      mergeItems(
+        [{ id: 'AA1', qty: 1 }],
+        [
+          { id: 'AA1', qty: 2 },
+          { id: 'AB2', qty: 1 },
+        ],
+      ),
+    ).toEqual([
       { id: 'AA1', qty: 3 },
       { id: 'AB2', qty: 1 },
     ])
@@ -49,9 +70,19 @@ describe('cart', () => {
     expect(isCart({})).toBe(false)
   })
   it('exports TSV and CSV', () => {
-    const rows = [{ reference: '-23319-D9700', description: 'PALIER; "X"\tY', qty: 2, section: 'AA 233C' }]
+    const rows = [
+      { reference: '-23319-D9700', description: 'PALIER; "X"\tY', qty: 2, section: 'AA 233C' },
+    ]
     const headers = ['Reference', 'Description', 'Qty', 'Section']
-    expect(toTSV(headers, rows)).toBe('Reference\tDescription\tQty\tSection\r\n-23319-D9700\tPALIER; "X" Y\t2\tAA 233C')
-    expect(toCSV(headers, rows)).toBe('Reference;Description;Qty;Section\r\n-23319-D9700;"PALIER; ""X""\tY";2;AA 233C\r\n')
+    expect(toTSV(headers, rows)).toBe(
+      'Reference\tDescription\tQty\tSection\r\n="-23319-D9700"\tPALIER; "X" Y\t2\tAA 233C',
+    )
+    expect(toCSV(headers, rows)).toBe(
+      'Reference;Description;Qty;Section\r\n"=""-23319-D9700""";"PALIER; ""X""\tY";2;AA 233C\r\n',
+    )
+  })
+  it('keeps cells that look like formulas as text', () => {
+    const rows = [{ reference: '+1', description: '=SUM(A1)', qty: 1, section: '@x' }]
+    expect(toTSV([], rows)).toBe('\r\n="+1"\t="=SUM(A1)"\t1\t="@x"')
   })
 })
