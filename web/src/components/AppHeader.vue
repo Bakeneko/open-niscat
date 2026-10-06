@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { mdiCart, mdiCheck, mdiMagnify, mdiTranslate } from '@mdi/js'
+import { mdiCart, mdiMagnify } from '@mdi/js'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -8,6 +8,7 @@ import { useLang } from '@/composables/useLang'
 import { useLinks } from '@/composables/useLinks'
 import { switchLang, type Lang } from '@/lib/lang'
 import { saveIfChanged } from '@/lib/storage'
+import FlagIcon from './FlagIcon.vue'
 import ScopeChip from './ScopeChip.vue'
 
 const emit = defineEmits<{ cart: [] }>()
@@ -70,14 +71,13 @@ function search() {
       <template #activator="{ props: menu }">
         <v-btn
           v-bind="menu"
-          :prepend-icon="mdiTranslate"
           variant="text"
           min-width="0"
           class="mx-1"
           :title="t('lang.label')"
           :aria-label="t('lang.label')"
         >
-          {{ lang.toUpperCase() }}
+          <FlagIcon :lang="lang" class="mr-2" />{{ lang.toUpperCase() }}
         </v-btn>
       </template>
       <v-list density="compact">
@@ -88,13 +88,9 @@ function search() {
           :active="lang === l"
           @click="rememberLang(l)"
         >
-          <template #prepend>
-            <span class="lang-code">{{ l.toUpperCase() }}</span>
-          </template>
-          <v-list-item-title>{{ t(`lang.${l}`) }}</v-list-item-title>
-          <template v-if="lang === l" #append>
-            <v-icon :icon="mdiCheck" size="small" />
-          </template>
+          <v-list-item-title class="d-flex align-center">
+            <FlagIcon :lang="l" class="mr-2" />{{ l.toUpperCase() }}
+          </v-list-item-title>
         </v-list-item>
       </v-list>
     </v-menu>

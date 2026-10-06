@@ -3,11 +3,6 @@
   text-decoration: none;
   font-weight: 600;
 }
-.lang-code {
-  display: inline-block;
-  min-width: 2.2em;
-  font-weight: 600;
-}
 .header-search {
   max-width: 420px;
 }

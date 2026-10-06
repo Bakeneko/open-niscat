@@ -23,7 +23,7 @@ export const fr: typeof en = {
     history: 'Consultés récemment',
     searchLabel: 'Rechercher des pièces ou des sections',
   },
-  lang: { label: 'Langue', en: 'Anglais', fr: 'Français' },
+  lang: { label: 'Langue' },
   scope: {
     none: 'Aucun véhicule',
     choose: 'Choisir un véhicule',
