@@ -1,11 +1,16 @@
 package api_test
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/json"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -268,5 +273,47 @@ func TestCancelledHealthIsNotLogged(t *testing.T) {
 	h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequestWithContext(ctx, http.MethodGet, "/health", http.NoBody))
 	if logs.Len() != 0 {
 		t.Fatalf("cancelled probe logged: %s", logs.String())
+	}
+}
+
+func getGzip(t *testing.T, h http.Handler, url string) *httptest.ResponseRecorder {
+	t.Helper()
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, url, http.NoBody)
+	req.Header.Set("Accept-Encoding", "gzip")
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	return rec
+}
+
+func TestCompression(t *testing.T) {
+	dir := catalogtest.NewDataDir(t)
+	big := bytes.Repeat([]byte("0123456789abcdef"), 512) // 8 KiB, compresses well
+	if err := os.WriteFile(filepath.Join(dir, "img", "AA", "BIG.png"), big, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	store, err := catalog.Open(context.Background(), dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = store.Close() })
+	web := fstest.MapFS{"index.html": {Data: []byte("<html>app</html>")}, "assets/app.js": {Data: big}}
+	h := api.New(store, web, catalog.LangEN, "dev")
+
+	rec := getGzip(t, h, "/assets/app.js")
+	if rec.Header().Get("Content-Encoding") != "gzip" || !strings.Contains(rec.Header().Get("Vary"), "Accept-Encoding") {
+		t.Fatalf("asset not compressed: %v", rec.Header())
+	}
+	zr, err := gzip.NewReader(rec.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if body, err := io.ReadAll(zr); err != nil || !bytes.Equal(body, big) {
+		t.Fatalf("decompressed body differs (err %v)", err)
+	}
+	if rec := get(t, h, "/assets/app.js"); rec.Header().Get("Content-Encoding") != "" || !bytes.Equal(rec.Body.Bytes(), big) {
+		t.Fatalf("client without gzip got %q", rec.Header().Get("Content-Encoding"))
+	}
+	if rec := getGzip(t, h, "/files/img/AA/BIG.png"); rec.Code != http.StatusOK || rec.Header().Get("Content-Encoding") != "" {
+		t.Fatalf("PNG (already compressed) = %d, encoding %q", rec.Code, rec.Header().Get("Content-Encoding"))
 	}
 }

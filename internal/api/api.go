@@ -13,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/klauspost/compress/gzhttp"
+
 	"open-niscat/internal/catalog"
 )
 
@@ -47,7 +49,7 @@ func New(store *catalog.Store, web fs.FS, defaultLang catalog.Lang, appVersion s
 	}))
 	mux.Handle("GET /files/", http.StripPrefix("/files", s.files()))
 	mux.HandleFunc("GET /", s.spa)
-	return noIndex(apiMethods(mux))
+	return noIndex(apiMethods(compress(mux)))
 }
 
 // apiMethods answers non-GET API requests with a JSON 405 (ServeMux would answer text/plain).
@@ -60,6 +62,20 @@ func apiMethods(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+// compress gzips text responses (JSON, frontend assets) for clients that accept it; drawings (PNG) and documents
+// (PDF) are already compressed.
+func compress(next http.Handler) http.Handler {
+	wrap, err := gzhttp.NewWrapper(gzhttp.ContentTypeFilter(func(ct string) bool {
+		ct, _, _ = strings.Cut(ct, ";")
+		return strings.HasPrefix(ct, "text/") || ct == "application/json" || ct == "image/svg+xml" ||
+			strings.HasSuffix(ct, "javascript")
+	}))
+	if err != nil {
+		panic(err) // the options above are constant
+	}
+	return wrap(next)
 }
 
 func noIndex(next http.Handler) http.Handler {
