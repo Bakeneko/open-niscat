@@ -1,8 +1,8 @@
 # Open Niscat
 
-Browse the NISCAT parts catalogue (Nissan Motor Ibérica light commercial vehicles and trucks, edition 01/2015) in a web browser: identify a vehicle by VIN, navigate the exploded views, search parts, follow supersessions, and build a parts list to copy, export or share.
+Browse the NISCAT parts catalog (Nissan Motor Ibérica light commercial vehicles and trucks, edition 01/2015) in a web browser: identify a vehicle by VIN, navigate the exploded views, search parts, follow supersessions, and build a parts list to copy, export or share.
 
-The catalogue data is **not** included: it is licensed by Nissan. You need your own `data/` folder (`data.db`, `manifest.json`, `img/`, `gindex/`, `cinfo/`).
+The catalog data is **not** included: it is licensed by Nissan. You need your own `data/` folder (`data.db`, `manifest.json`, `img/`, `gindex/`, `cinfo/`).
 
 *Version française : [README.fr.md](README.fr.md).*
 
@@ -39,6 +39,6 @@ make build         # frontend, then binaries for Linux and Windows in dist/
 
 Development: `make run` (API on :8080 with `./data`) and `npm --prefix web run dev` (Vite with hot reload, proxies `/api` and `/files`).
 
-## Licence and data
+## License and data
 
-The source code is yours to use. The catalogue data belongs to Nissan and must never be committed or published.
+The source code is yours to use. The catalog data belongs to Nissan and must never be committed or published.
