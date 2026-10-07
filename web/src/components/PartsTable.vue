@@ -17,6 +17,10 @@ const hasDetails = (l: Line) =>
   l.latest !== undefined ||
   l.inPeriod === false ||
   extraFields.some((f) => l[f] !== '')
+// Selecting a value to copy it (PNC, spec...) must not close the details.
+function closeDetails(l: Line) {
+  if ((window.getSelection()?.toString() ?? '') === '') emit('select', l.itemKey)
+}
 const indent = (l: Line) => ({ paddingLeft: `${String(Math.max(l.level - 1, 0) * 12 + 6)}px` })
 </script>
 
@@ -78,11 +82,7 @@ const indent = (l: Line) => ({ paddingLeft: `${String(Math.max(l.level - 1, 0) *
           </td>
         </tr>
         <!-- Details of the selected item open in place, under each of its lines. -->
-        <tr
-          v-if="isSelected(l) && hasDetails(l)"
-          class="detail-row"
-          @click="emit('select', l.itemKey)"
-        >
+        <tr v-if="isSelected(l) && hasDetails(l)" class="detail-row" @click="closeDetails(l)">
           <td />
           <td colspan="3">
             <dl class="details">
