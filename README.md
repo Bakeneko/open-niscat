@@ -17,7 +17,7 @@ The catalog data is **not** included: it is licensed by Nissan. You need your ow
 - **Supersessions**: alternative and latest known part numbers, and every plate where a part is used.
 - **Parts list**: kept in the browser, quantities, copy for a spreadsheet, CSV export, print / PDF, and a share link that opens the same list elsewhere.
 - **Shareable URLs**: every page (vehicle, plate, selected callout, search, list) has its own link.
-- English and French interface; designed for desktop and mobile; plates print as drawing then parts table.
+- English, French, Spanish and German interface (the languages of the NISCAT data); designed for desktop and mobile; plates print as drawing then parts table.
 
 ## Data
 
@@ -50,7 +50,7 @@ Options (also settable in `open-niscat.toml` next to the binary — see `open-ni
 | `--data` | `./data` next to the binary | data directory |
 | `--addr` | `127.0.0.1:8080` | listen address; `0.0.0.0:8080` to allow other machines of the local network |
 | `--open-browser` | `true` | open the default browser on startup |
-| `--default-lang` | `en` | language offered on `/` (`en` or `fr`) |
+| `--default-lang` | `en` | language offered on `/` (`en`, `fr`, `es` or `de`) |
 | `--config` | `open-niscat.toml` next to the binary | configuration file |
 
 Priority: flags, then the file, then defaults. An unknown key or invalid value stops the program with a message.

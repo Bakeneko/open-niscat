@@ -17,7 +17,7 @@ Les données du catalogue ne sont **pas** fournies : elles sont sous licence Nis
 - **Remplacements** : références alternatives et dernière référence connue, et toutes les planches où une pièce est utilisée.
 - **Liste de pièces** : conservée dans le navigateur, quantités, copie pour un tableur, export CSV, impression / PDF, et lien de partage qui ouvre la même liste ailleurs.
 - **URL partageables** : chaque page (véhicule, planche, repère sélectionné, recherche, liste) a son propre lien.
-- Interface en anglais et en français ; pensée pour l'ordinateur comme pour le mobile ; les planches s'impriment dessin puis tableau des pièces.
+- Interface en anglais, français, espagnol et allemand (les langues des données NISCAT) ; pensée pour l'ordinateur comme pour le mobile ; les planches s'impriment dessin puis tableau des pièces.
 
 ## Données
 
@@ -50,7 +50,7 @@ Options (également réglables dans `open-niscat.toml` à côté du binaire — 
 | `--data` | `./data` à côté du binaire | dossier des données |
 | `--addr` | `127.0.0.1:8080` | adresse d'écoute ; `0.0.0.0:8080` pour autoriser les autres machines du réseau local |
 | `--open-browser` | `true` | ouvrir le navigateur par défaut au démarrage |
-| `--default-lang` | `en` | langue proposée sur `/` (`en` ou `fr`) |
+| `--default-lang` | `en` | langue proposée sur `/` (`en`, `fr`, `es` ou `de`) |
 | `--config` | `open-niscat.toml` à côté du binaire | fichier de configuration |
 
 Priorité : options de la ligne de commande, puis fichier, puis valeurs par défaut. Une clé inconnue ou une valeur invalide arrête le programme avec un message.
