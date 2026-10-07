@@ -209,7 +209,7 @@ func (s *Store) fileURL(kind, etd, name string) string {
 
 // englishName is a SQL expression for the English name of section alias s (NISCAT labels can differ a lot
 // between languages; the English one is shown as a hint next to a translated name).
-const englishName = "(SELECT e.nomsec FROM section e WHERE e.etd = s.etd AND e.numsec = s.numsec AND e.lang = 'en')"
+const englishName = "(SELECT e.nomsec FROM section e WHERE e.etd = s.etd AND e.plate = s.plate AND e.lang = 'en')"
 
 // nameEN returns the English name when it differs from the displayed one.
 func nameEN(name string, en sql.NullString) string {
