@@ -25,6 +25,11 @@ const router = useRouter()
 const lang = useLang()
 const links = useLinks()
 const partsList = usePartsList()
+// Items with a line in the parts list: their callouts turn green on the drawing.
+const listed = computed(() => {
+  const ids = new Set(partsList.items.value.map((i) => i.id))
+  return [...new Set((data.value?.lines ?? []).filter((l) => ids.has(l.id)).map((l) => l.itemKey))]
+})
 const history = useHistory()
 const { notify } = useNotify()
 const { current } = useScope()
@@ -160,6 +165,7 @@ watch([selected, data], async ([key, s]) => {
             :src="data.image"
             :hotspots="data.hotspots"
             :selected="selected"
+            :listed="listed"
             :titles="titles"
             labels
             class="viewer-mobile"
@@ -178,6 +184,7 @@ watch([selected, data], async ([key, s]) => {
           :src="data.image"
           :hotspots="data.hotspots"
           :selected="selected"
+          :listed="listed"
           :titles="titles"
           labels
           @select="select"

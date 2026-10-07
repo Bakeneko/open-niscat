@@ -14,6 +14,8 @@ const props = defineProps<{
   labels?: boolean
   /** Hotspot keys shown greyed out (e.g. sections not applicable to the vehicle). */
   muted?: string[]
+  /** Hotspot keys shown in green: items already in the parts list (as NISCAT does). */
+  listed?: string[]
 }>()
 const emit = defineEmits<{ select: [key: string] }>()
 const { t } = useI18n()
@@ -235,7 +237,12 @@ watch(
         :key="i"
         type="button"
         class="hotspot"
-        :class="{ selected: h.key === selected, labelled: labels, muted: muted?.includes(h.key) }"
+        :class="{
+          selected: h.key === selected,
+          labelled: labels,
+          muted: muted?.includes(h.key),
+          listed: listed?.includes(h.key),
+        }"
         :style="spotStyle(h)"
         :data-key="h.key"
         :aria-label="titles?.[h.key] ?? h.caption"
@@ -330,6 +337,9 @@ watch(
   color: rgb(150, 150, 150);
   outline: 1px dashed rgb(150, 150, 150);
 }
+.hotspot.labelled.listed .caption {
+  color: rgb(46, 125, 50);
+}
 .hotspot.labelled.selected {
   border-color: transparent;
   background: transparent;
@@ -337,6 +347,11 @@ watch(
 .hotspot.labelled.selected .caption {
   color: rgb(var(--v-theme-primary));
   box-shadow: 0 0 0 3px rgb(var(--v-theme-primary));
+}
+/* Selected and already in the parts list: the frame shows the selection, the green keeps the list status. */
+.hotspot.labelled.selected.listed .caption {
+  color: rgb(46, 125, 50);
+  box-shadow: 0 0 0 3px rgb(46, 125, 50);
 }
 .hotspot.muted {
   border-style: dashed;
