@@ -41,4 +41,4 @@ Development: `make run` (API on :8080 with `./data`) and `npm --prefix web run d
 
 ## License and data
 
-The source code is yours to use. The catalog data belongs to Nissan and must never be committed or published.
+The source code is released under the [MIT License](LICENSE). The catalog data belongs to Nissan: it is not distributed with this project and must never be committed or published.

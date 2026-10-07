@@ -41,4 +41,4 @@ Développement : `make run` (API sur :8080 avec `./data`) et `npm --prefix web r
 
 ## Licence et données
 
-Le code source est libre d'utilisation. Les données du catalogue appartiennent à Nissan et ne doivent jamais être commitées ni publiées.
+Le code source est publié sous [licence MIT](LICENSE). Les données du catalogue appartiennent à Nissan : elles ne sont pas distribuées avec ce projet et ne doivent jamais être commitées ni publiées.
