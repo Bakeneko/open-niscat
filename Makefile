@@ -7,7 +7,7 @@ PYTHON ?= python
 # Explicit Go packages: ./... would walk into web/node_modules, which ships stray .go files.
 GOPKGS = ./cmd/... ./internal/... ./web
 
-.PHONY: test lint test-go lint-go fmt-go web web-install lint-web test-web tools-install lint-tools test-tools run build build-go build-linux build-windows
+.PHONY: test lint test-go lint-go fmt-go web web-install lint-web test-web tools-install lint-tools test-tools run build build-go build-linux-amd64 build-linux-arm64 build-windows-amd64 build-darwin-arm64 docker
 
 ## test: run all tests
 test: test-go test-web test-tools
@@ -61,19 +61,35 @@ run:
 VERSION ?= $(shell git describe --tags --always --dirty)
 GOBUILD = go build -trimpath -ldflags "-s -w -X main.version=$(VERSION)"
 
-## build: build the binaries for Linux and Windows (amd64) into dist/
+## build: build the release binaries (Linux amd64/arm64, Windows amd64, macOS arm64) into dist/
 build: web build-go
 
-build-go: build-linux build-windows
+build-go: build-linux-amd64 build-linux-arm64 build-windows-amd64 build-darwin-arm64
 
-build-linux: export GOOS = linux
-build-linux: export GOARCH = amd64
-build-linux: export CGO_ENABLED = 0
-build-linux:
+build-linux-amd64: export GOOS = linux
+build-linux-amd64: export GOARCH = amd64
+build-linux-amd64: export CGO_ENABLED = 0
+build-linux-amd64:
 	$(GOBUILD) -o dist/open-niscat-linux-amd64 ./cmd/open-niscat
 
-build-windows: export GOOS = windows
-build-windows: export GOARCH = amd64
-build-windows: export CGO_ENABLED = 0
-build-windows:
+build-linux-arm64: export GOOS = linux
+build-linux-arm64: export GOARCH = arm64
+build-linux-arm64: export CGO_ENABLED = 0
+build-linux-arm64:
+	$(GOBUILD) -o dist/open-niscat-linux-arm64 ./cmd/open-niscat
+
+build-windows-amd64: export GOOS = windows
+build-windows-amd64: export GOARCH = amd64
+build-windows-amd64: export CGO_ENABLED = 0
+build-windows-amd64:
 	$(GOBUILD) -o dist/open-niscat-windows-amd64.exe ./cmd/open-niscat
+
+build-darwin-arm64: export GOOS = darwin
+build-darwin-arm64: export GOARCH = arm64
+build-darwin-arm64: export CGO_ENABLED = 0
+build-darwin-arm64:
+	$(GOBUILD) -o dist/open-niscat-darwin-arm64 ./cmd/open-niscat
+
+## docker: build the Docker image for this machine's platform, tagged open-niscat:$(VERSION)
+docker:
+	docker build --build-arg VERSION=$(VERSION) -t open-niscat:$(VERSION) .
