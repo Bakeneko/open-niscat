@@ -91,7 +91,8 @@ jobs:
 
   image:
     name: Docker image
-    needs: check
+    # After the GitHub release: a failed release must not leave a published image behind.
+    needs: release
     runs-on: ubuntu-latest
     permissions:
       contents: read
