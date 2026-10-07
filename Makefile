@@ -7,7 +7,7 @@ PYTHON ?= python
 # Explicit Go packages: ./... would walk into web/node_modules, which ships stray .go files.
 GOPKGS = ./cmd/... ./internal/... ./web
 
-.PHONY: test lint test-go lint-go fmt-go web web-install lint-web test-web tools-install lint-tools test-tools run build build-go build-linux-amd64 build-linux-arm64 build-windows-amd64 build-darwin-arm64 docker
+.PHONY: test lint vuln test-go lint-go fmt-go web web-install lint-web test-web tools-install lint-tools test-tools run build build-go build-linux-amd64 build-linux-arm64 build-windows-amd64 build-darwin-arm64 docker
 
 ## test: run all tests
 test: test-go test-web test-tools
@@ -20,6 +20,10 @@ test-go:
 
 lint-go:
 	golangci-lint run $(GOPKGS)
+
+## vuln: report known vulnerabilities reachable from the Go code (needs network access)
+vuln:
+	go run golang.org/x/vuln/cmd/govulncheck@v1.8.0 $(GOPKGS)
 
 ## fmt-go: format Go code (gofumpt + goimports)
 fmt-go:

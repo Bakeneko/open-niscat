@@ -95,6 +95,7 @@ Requirements: Go 1.26+, Node 24+, GNU Make, golangci-lint 2.x.
 make web-install   # once, and after a change of web/package-lock.json
 make tools-install # once: Python dependencies of tools/data (Pillow, ruff, mypy, pytest)
 make lint test     # Go, frontend and data tooling
+make vuln          # known vulnerabilities in the Go dependencies (govulncheck)
 make build         # frontend, then the four release binaries in dist/
 ```
 
