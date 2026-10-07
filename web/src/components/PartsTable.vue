@@ -58,7 +58,7 @@ const indent = (l: Line) => ({ paddingLeft: `${String(Math.max(l.level - 1, 0) *
               size="small"
               class="text-no-wrap px-2"
               :color="l.inPeriod === false ? 'warning' : undefined"
-              :variant="l.inPeriod === false ? 'flat' : 'tonal'"
+              variant="tonal"
               :title="l.inPeriod === false ? t('part.outOfPeriod') : undefined"
             >
               {{ formatRange(l.from, l.to) }}
