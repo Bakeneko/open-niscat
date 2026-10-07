@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useHistory } from '@/composables/useHistory'
 import { useLinks } from '@/composables/useLinks'
+import type { Meta } from '@/api/types'
 import { useMeta } from '@/composables/useMeta'
 
 const { t } = useI18n()
@@ -13,12 +14,12 @@ const links = useLinks()
 const history = useHistory()
 const vin = ref('')
 const q = ref('')
-const edition = ref('')
+const meta = ref<Meta | null>(null)
 
 onMounted(() => {
   useMeta()
     .then((m) => {
-      edition.value = m.edition
+      meta.value = m
     })
     .catch(() => undefined)
 })
@@ -76,8 +77,8 @@ function search() {
         />
       </v-list>
     </v-card>
-    <div v-if="edition" class="text-caption text-medium-emphasis mt-4">
-      {{ t('app.edition', { edition }) }}
+    <div v-if="meta" class="text-caption text-medium-emphasis mt-4">
+      {{ t('app.version', { app: meta.appVersion, edition: meta.edition, data: meta.version }) }}
     </div>
   </v-container>
 </template>

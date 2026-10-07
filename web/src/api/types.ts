@@ -9,6 +9,8 @@ export interface Meta {
   edition: string
   built: string
   defaultLang: Lang
+  /** Build version of the program (git tag or commit). */
+  appVersion: string
 }
 export interface Catalog {
   cat: string

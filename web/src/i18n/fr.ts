@@ -3,7 +3,7 @@ import type { en } from './en'
 export const fr: typeof en = {
   app: {
     title: 'Open Niscat',
-    edition: 'Données : {edition}',
+    version: 'Open Niscat {app} · Données {edition} ({data})',
     loading: 'Chargement…',
     retry: 'Réessayer',
     notFound: 'Page introuvable',
