@@ -85,6 +85,7 @@ function zoom(factor: number, at?: { x: number; y: number }) {
 function onWheel(e: WheelEvent) {
   if (e.deltaY === 0) return
   e.preventDefault()
+  hideTip()
   // Smooth for trackpads (small deltas), about x1.2 per mouse notch; deltaMode 1 counts lines.
   const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY
   zoom(Math.exp(-Math.max(-300, Math.min(300, dy)) * 0.002), local(e))
@@ -98,11 +99,18 @@ function spotKey(target: EventTarget | null): string | null {
 const TIP_DELAY = 300
 const tip = ref<{ text: string; x: number; y: number } | null>(null)
 let tipTimer: ReturnType<typeof setTimeout> | undefined
+// Placed beside the cursor, flipped left/up near the right/bottom edges (the viewer clips its content).
 function tipStyle(at: { x: number; y: number }) {
   const w = box.value?.clientWidth ?? 0
-  return at.x > w * 0.6
-    ? { right: `${String(w - at.x + 12)}px`, top: `${String(at.y + 16)}px` }
-    : { left: `${String(at.x + 12)}px`, top: `${String(at.y + 16)}px` }
+  const h = box.value?.clientHeight ?? 0
+  return {
+    ...(at.x > w * 0.6
+      ? { right: `${String(w - at.x + 12)}px` }
+      : { left: `${String(at.x + 12)}px` }),
+    ...(at.y > h * 0.6
+      ? { bottom: `${String(h - at.y + 12)}px` }
+      : { top: `${String(at.y + 16)}px` }),
+  }
 }
 function onSpotEnter(e: PointerEvent, h: Hotspot) {
   if (e.pointerType !== 'mouse' || pointers.size > 0) return
@@ -200,6 +208,7 @@ watch(
     natural.value = { w: 0, h: 0 }
     failed.value = false
     pointers.clear()
+    hideTip()
   },
 )
 </script>
@@ -229,7 +238,7 @@ watch(
         :class="{ selected: h.key === selected, labelled: labels, muted: muted?.includes(h.key) }"
         :style="spotStyle(h)"
         :data-key="h.key"
-        :aria-label="h.caption"
+        :aria-label="titles?.[h.key] ?? h.caption"
         @pointerenter="onSpotEnter($event, h)"
         @pointermove="onSpotMove"
         @pointerleave="hideTip"
