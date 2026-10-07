@@ -204,7 +204,7 @@ function setAll(v: boolean | null) {
           </template>
           <template #subtitle>
             <RouterLink :to="sectionLink(p)" class="plate-link"
-              >{{ p.etd }} {{ p.sec }} · {{ t('part.item') }} {{ p.item || p.itemKey }}</RouterLink
+              >{{ p.etd }} {{ p.sec }} · {{ t('part.item') }} {{ p.callout }}</RouterLink
             >
             <template v-if="p.from || p.to"> · {{ formatRange(p.from, p.to) }}</template>
           </template>

@@ -70,7 +70,7 @@ const { data, error, loading, reload } = useFetch<PartInfo>(() =>
                 o.sec
               }}</RouterLink>
             </td>
-            <td>{{ o.item || o.itemKey }}/{{ o.variant }}</td>
+            <td>{{ o.callout }}</td>
             <td>{{ o.description }}</td>
             <td>{{ o.qty }}</td>
             <td>{{ formatRange(o.from, o.to) }}</td>

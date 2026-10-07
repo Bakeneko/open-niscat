@@ -65,7 +65,7 @@ const rows = computed<ListRow[]>(() =>
             reference: l.partNo,
             description: l.description,
             qty: i.qty,
-            section: `${l.etd} ${l.sec} / ${l.item || l.itemKey}`,
+            section: `${l.etd} ${l.sec} / ${l.callout}`,
           },
         ]
   }),
@@ -228,7 +228,7 @@ function removeMissing() {
           <!-- The vehicle the line was added for sits under its plate: one column less on phones. -->
           <td>
             <RouterLink :to="sectionLink(i, l)" class="text-no-wrap" @click.stop
-              >{{ l.etd }} {{ l.sec }} / {{ l.item || l.itemKey }}</RouterLink
+              >{{ l.etd }} {{ l.sec }} / {{ l.callout }}</RouterLink
             >
             <div v-if="i.scope" class="text-caption text-medium-emphasis vehicle-label">
               {{ scopeLabel(i.scope) }}

@@ -92,6 +92,8 @@ export interface Line {
   item: string
   itemKey: string
   variant: string
+  /** "01-02": drawing number then line number within the item (set on every line). */
+  callout: string
   level: number
   partNo: string
   partKey: string

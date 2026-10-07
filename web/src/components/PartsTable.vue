@@ -43,8 +43,8 @@ const indent = (l: Line) => ({ paddingLeft: `${String(Math.max(l.level - 1, 0) *
           @click="emit('select', l.itemKey)"
         >
           <td class="text-no-wrap">
-            <span class="text-medium-emphasis">{{ l.mark }}</span> {{ l.item
-            }}<span v-if="l.variant" class="text-caption">/{{ l.variant }}</span>
+            <span class="mark text-medium-emphasis">{{ l.mark }}</span
+            >{{ l.callout }}
           </td>
           <!-- One "Part" cell (number, then description) keeps the table within narrow panels. -->
           <td :style="indent(l)" class="part-cell">
@@ -125,6 +125,11 @@ const indent = (l: Line) => ({ paddingLeft: `${String(Math.max(l.level - 1, 0) *
 /* Scrolling a selected item to the top of the panel leaves a little context above it. */
 .parts-table tbody tr {
   scroll-margin-top: 48px;
+}
+/* Fixed slot for the NISCAT mark (*, # or none) so callouts line up. */
+.mark {
+  display: inline-block;
+  width: 0.75em;
 }
 .detail-row td {
   background: rgba(var(--v-theme-primary), 0.05);
