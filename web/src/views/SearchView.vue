@@ -50,7 +50,15 @@ const fetches = Object.fromEntries(
     ),
   ]),
 ) as Record<SearchTab, Fetched<SearchResult>>
-const loaded = computed(() => SEARCH_TABS.every((tab) => fetches[tab].data.value !== null))
+// The automatic tab waits for every request of the current search to settle (results or error): previous
+// results kept while loading must not pick it, and a failed tab counts as empty.
+const loaded = computed(() =>
+  SEARCH_TABS.every(
+    (tab) =>
+      !fetches[tab].loading.value &&
+      (fetches[tab].data.value !== null || fetches[tab].error.value !== null),
+  ),
+)
 const type = computed<SearchTab | null>(() => {
   if (explicit.value !== null) return explicit.value
   if (!loaded.value) return null
@@ -90,8 +98,9 @@ function sectionLink(p: LineRef) {
   return links.to(`/section/${p.etd}/${p.sec}`, { item: p.itemKey })
 }
 // A new page starts from its first results.
+// The page belongs to the open tab: an automatically chosen tab is written too, so the offset applies.
 function setPage(n: number) {
-  setQuery({ page: String(n) })
+  setQuery(type.value === null ? { page: String(n) } : { page: String(n), type: type.value })
   window.scrollTo({ top: 0 })
 }
 // Only a user's choice is written to the URL: v-tabs selects its first tab by itself while results load.
