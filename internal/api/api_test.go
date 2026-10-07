@@ -26,7 +26,7 @@ func newServer(t *testing.T) http.Handler {
 		"index.html":    {Data: []byte("<html>app</html>")},
 		"assets/app.js": {Data: []byte("console.log(1)")},
 	}
-	return api.New(store, web, catalog.LangFR)
+	return api.New(store, web, catalog.LangFR, "v1.2.3")
 }
 
 func get(t *testing.T, h http.Handler, url string) *httptest.ResponseRecorder {
@@ -52,7 +52,9 @@ func TestJSONEndpoints(t *testing.T) {
 		status int
 		check  func(map[string]any) bool
 	}{
-		{"/api/meta", 200, func(m map[string]any) bool { return m["edition"] == "Ed. TEST" && m["defaultLang"] == "fr" }},
+		{"/api/meta", 200, func(m map[string]any) bool {
+			return m["edition"] == "Ed. TEST" && m["defaultLang"] == "fr" && m["appVersion"] == "v1.2.3"
+		}},
 		{"/api/vin/VSKBEC220U0990494?lang=fr", 200, func(m map[string]any) bool {
 			v := m["vehicle"].(map[string]any)
 			return v["catalog"].(map[string]any)["cat"] == "AA-G01" && v["attributes"].([]any)[1].(map[string]any)["value"] == "COURT"
@@ -144,7 +146,7 @@ func TestSPAWithoutBuiltFrontend(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer store.Close()
-	h := api.New(store, fstest.MapFS{".gitkeep": {}}, catalog.LangEN)
+	h := api.New(store, fstest.MapFS{".gitkeep": {}}, catalog.LangEN, "dev")
 	if rec := get(t, h, "/"); rec.Code != http.StatusServiceUnavailable {
 		t.Fatalf("status %d", rec.Code)
 	}

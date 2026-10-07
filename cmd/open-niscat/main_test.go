@@ -53,3 +53,16 @@ func TestHelpIsNotAnError(t *testing.T) {
 		t.Fatalf("exit code for an error = %d, want 1", code)
 	}
 }
+
+func TestAppVersion(t *testing.T) {
+	prev := version
+	t.Cleanup(func() { version = prev })
+	version = "v1.2.3"
+	if got := appVersion(); got != "v1.2.3" {
+		t.Errorf("appVersion() = %q with an injected version", got)
+	}
+	version = ""
+	if got := appVersion(); got == "" {
+		t.Error("appVersion() must fall back to the VCS revision or dev")
+	}
+}

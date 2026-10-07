@@ -42,7 +42,10 @@ test-web:
 run:
 	go run ./cmd/open-niscat --data $(DATA) --open-browser=false
 
-GOBUILD = go build -trimpath -ldflags "-s -w"
+# Version shown by --version, the startup log and the home page: the git tag, else the commit (-dirty when
+# modified). Override with make build VERSION=v1.2.3.
+VERSION ?= $(shell git describe --tags --always --dirty)
+GOBUILD = go build -trimpath -ldflags "-s -w -X main.version=$(VERSION)"
 
 ## build: build the binaries for Linux and Windows (amd64) into dist/
 build: web build-go

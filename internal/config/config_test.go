@@ -1,6 +1,7 @@
 package config_test
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -109,5 +110,13 @@ func TestErrors(t *testing.T) {
 				t.Fatalf("got %v, want error containing %q", err, tc.want)
 			}
 		})
+	}
+}
+
+func TestVersionFlagSkipsTheConfigFile(t *testing.T) {
+	dir := t.TempDir()
+	writeConfig(t, dir, "addr = \n") // invalid: --version must not need a readable configuration
+	if _, err := config.Load([]string{"--version"}, dir); !errors.Is(err, config.ErrVersion) {
+		t.Fatalf("Load(--version) = %v, want ErrVersion", err)
 	}
 }

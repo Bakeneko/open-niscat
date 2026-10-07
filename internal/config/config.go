@@ -13,6 +13,9 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+// ErrVersion is returned by Load when --version is given: the caller prints its version and exits.
+var ErrVersion = errors.New("version requested")
+
 // FileName is the configuration file looked up next to the binary.
 const FileName = "open-niscat.toml"
 
@@ -46,11 +49,15 @@ func Load(args []string, baseDir string) (Config, error) {
 	addr := flags.String("addr", "", "listen address, e.g. 127.0.0.1:8080")
 	openBrowser := flags.Bool("open-browser", true, "open the default browser on startup")
 	defaultLang := flags.String("default-lang", "", "language offered on / (en or fr)")
+	showVersion := flags.Bool("version", false, "print the version and exit")
 	if err := flags.Parse(args); err != nil {
 		return Config{}, fmt.Errorf("parse flags: %w", err)
 	}
 	if flags.NArg() > 0 {
 		return Config{}, fmt.Errorf("unexpected argument %q (use --data to choose the data directory)", flags.Arg(0))
+	}
+	if *showVersion {
+		return Config{}, ErrVersion
 	}
 	set := map[string]bool{}
 	flags.Visit(func(f *flag.Flag) { set[f.Name] = true })

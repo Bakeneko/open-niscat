@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"runtime/debug"
 	"syscall"
 	"time"
 
@@ -20,6 +21,35 @@ import (
 	"open-niscat/internal/config"
 	"open-niscat/web"
 )
+
+// version is set at build time (-ldflags "-X main.version=v1.2.3", see the Makefile).
+var version string
+
+// appVersion is the injected version, else the git revision Go records in the binary, else "dev".
+func appVersion() string {
+	if version != "" {
+		return version
+	}
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return "dev"
+	}
+	var rev, dirty string
+	for _, s := range info.Settings {
+		switch s.Key {
+		case "vcs.revision":
+			rev = s.Value
+		case "vcs.modified":
+			if s.Value == "true" {
+				dirty = "-dirty"
+			}
+		}
+	}
+	if rev == "" {
+		return "dev"
+	}
+	return rev[:min(len(rev), 12)] + dirty
+}
 
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -46,6 +76,10 @@ func run(ctx context.Context, args []string) error {
 		return fmt.Errorf("locate binary: %w", err)
 	}
 	cfg, err := config.Load(args, filepath.Dir(exe))
+	if errors.Is(err, config.ErrVersion) {
+		fmt.Println("open-niscat", appVersion())
+		return nil
+	}
 	if err != nil {
 		return fmt.Errorf("configuration: %w", err)
 	}
@@ -67,9 +101,9 @@ func run(ctx context.Context, args []string) error {
 		}
 		return fmt.Errorf("cannot listen on %s (%s): %w", cfg.Addr, hint, err)
 	}
-	srv := &http.Server{Handler: api.New(store, web.Dist(), lang), ReadHeaderTimeout: 10 * time.Second}
+	srv := &http.Server{Handler: api.New(store, web.Dist(), lang, appVersion()), ReadHeaderTimeout: 10 * time.Second}
 	url := browserURL(listener.Addr())
-	slog.Info("open-niscat ready", "url", url, "data", cfg.Data, "edition", store.Manifest().Edition)
+	slog.Info("open-niscat ready", "version", appVersion(), "url", url, "data", cfg.Data, "edition", store.Manifest().Edition)
 
 	served := make(chan error, 1)
 	go func() { served <- srv.Serve(listener) }()

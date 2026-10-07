@@ -17,13 +17,14 @@ type server struct {
 	store       *catalog.Store
 	web         fs.FS
 	defaultLang catalog.Lang
+	appVersion  string
 }
 
 type handlerFunc func(r *http.Request) (any, error)
 
 // New returns the HTTP handler: /api/... JSON, /files/... data files, anything else the SPA.
-func New(store *catalog.Store, web fs.FS, defaultLang catalog.Lang) http.Handler {
-	s := &server{store: store, web: web, defaultLang: defaultLang}
+func New(store *catalog.Store, web fs.FS, defaultLang catalog.Lang, appVersion string) http.Handler {
+	s := &server{store: store, web: web, defaultLang: defaultLang, appVersion: appVersion}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/meta", s.json(s.meta))
 	mux.HandleFunc("GET /api/vin/{vin}", s.json(s.vin))
@@ -113,7 +114,7 @@ func (s *server) meta(*http.Request) (any, error) {
 	m := s.store.Manifest()
 	return map[string]any{
 		"schema": m.Schema, "version": m.Version, "edition": m.Edition, "built": m.Built,
-		"defaultLang": string(s.defaultLang),
+		"defaultLang": string(s.defaultLang), "appVersion": s.appVersion,
 	}, nil
 }
 
