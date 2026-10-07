@@ -9,10 +9,10 @@ describe('lang', () => {
     expect(isLang('de')).toBe(false)
   })
   it('localizes paths', () => {
-    expect(localizedPath('en', '/cart')).toBe('/cart')
-    expect(localizedPath('fr', '/cart')).toBe('/fr/cart')
+    expect(localizedPath('en', '/list')).toBe('/list')
+    expect(localizedPath('fr', '/list')).toBe('/fr/list')
     expect(localizedPath('fr', '/')).toBe('/fr')
-    expect(localizedPath('fr', 'cart')).toBe('/fr/cart')
+    expect(localizedPath('fr', 'list')).toBe('/fr/list')
   })
   it('switches language keeping path, query and hash', () => {
     expect(switchLang('/section/AA/233C?vin=X&item=4&tab=info', 'fr')).toBe(
@@ -23,6 +23,6 @@ describe('lang', () => {
     expect(switchLang('/fr?x=1', 'en')).toBe('/?x=1')
     expect(switchLang('/', 'fr')).toBe('/fr')
     expect(switchLang('/french-fries', 'fr')).toBe('/fr/french-fries')
-    expect(switchLang('/fr/cart', 'fr')).toBe('/fr/cart')
+    expect(switchLang('/fr/list', 'fr')).toBe('/fr/list')
   })
 })

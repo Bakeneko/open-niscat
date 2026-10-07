@@ -14,7 +14,7 @@ export const fr: typeof en = {
     internal: 'Erreur du serveur.',
     network: 'Le serveur est injoignable.',
   },
-  nav: { home: 'Accueil', catalogs: 'Catalogues', cart: 'Liste de pièces', vehicle: 'Véhicule' },
+  nav: { home: 'Accueil', catalogs: 'Catalogues', list: 'Liste de pièces', vehicle: 'Véhicule' },
   home: {
     vinLabel: 'VIN',
     vinHint: 'VIN complet, ou ses 6 derniers caractères (ou plus)',
@@ -108,7 +108,7 @@ export const fr: typeof en = {
     none: 'Aucun résultat.',
     scoped: 'Limité au véhicule actif',
   },
-  cart: {
+  list: {
     title: 'Liste de pièces',
     empty: 'La liste de pièces est vide.',
     add: 'Ajouter à la liste',

@@ -12,7 +12,7 @@ export const en = {
     internal: 'Server error.',
     network: 'The server cannot be reached.',
   },
-  nav: { home: 'Home', catalogs: 'Catalogs', cart: 'Parts list', vehicle: 'Vehicle' },
+  nav: { home: 'Home', catalogs: 'Catalogs', list: 'Parts list', vehicle: 'Vehicle' },
   home: {
     vinLabel: 'VIN',
     vinHint: 'Full VIN, or its last 6+ characters',
@@ -106,7 +106,7 @@ export const en = {
     none: 'No results.',
     scoped: 'Limited to the current vehicle',
   },
-  cart: {
+  list: {
     title: 'Parts list',
     empty: 'The parts list is empty.',
     add: 'Add to the list',

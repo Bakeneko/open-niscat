@@ -9,7 +9,7 @@ import type { Line, Section, Vehicle } from '@/api/types'
 import DrawingViewer from '@/components/DrawingViewer.vue'
 import ErrorAlert from '@/components/ErrorAlert.vue'
 import PartsTable from '@/components/PartsTable.vue'
-import { useCart } from '@/composables/useCart'
+import { usePartsList } from '@/composables/usePartsList'
 import { useFetch } from '@/composables/useFetch'
 import { useHistory } from '@/composables/useHistory'
 import { useLang } from '@/composables/useLang'
@@ -24,7 +24,7 @@ const route = useRoute()
 const router = useRouter()
 const lang = useLang()
 const links = useLinks()
-const cart = useCart()
+const partsList = usePartsList()
 const history = useHistory()
 const { notify } = useNotify()
 const { current } = useScope()
@@ -75,8 +75,8 @@ function setTab(v: unknown) {
   void router.replace({ query: { ...route.query, tab: v === 'info' ? 'info' : 'drawing' } })
 }
 function add(line: Line) {
-  cart.add(line.id, 1, current.value)
-  notify(t('cart.added'))
+  partsList.add(line.id, 1, current.value)
+  notify(t('list.added'))
 }
 
 watch(data, (s) => {

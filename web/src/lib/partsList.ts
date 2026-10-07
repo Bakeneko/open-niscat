@@ -1,12 +1,12 @@
 import { isScope, type Scope } from './scope'
 
-export interface CartItem {
+export interface ListItem {
   id: string
   qty: number
   scope?: Scope
 }
 
-export interface CartRow {
+export interface ListRow {
   reference: string
   description: string
   qty: number
@@ -24,11 +24,11 @@ export function normalizeId(id: string): string | null {
 }
 
 export function addItem(
-  items: readonly CartItem[],
+  items: readonly ListItem[],
   id: string,
   qty = 1,
   scope?: Scope,
-): CartItem[] {
+): ListItem[] {
   const nid = normalizeId(id)
   if (nid === null || !Number.isInteger(qty) || qty <= 0) return [...items]
   if (items.some((i) => i.id === nid)) {
@@ -38,27 +38,27 @@ export function addItem(
   return [...items, scope === undefined ? { id: nid, qty } : { id: nid, qty, scope }]
 }
 
-export function setQty(items: readonly CartItem[], id: string, qty: number): CartItem[] {
+export function setQty(items: readonly ListItem[], id: string, qty: number): ListItem[] {
   if (!Number.isFinite(qty) || qty < 1) return removeItem(items, id)
   return items.map((i) => (i.id === id ? { ...i, qty: Math.min(Math.floor(qty), MAX_QTY) } : i))
 }
 
-export function removeItem(items: readonly CartItem[], id: string): CartItem[] {
+export function removeItem(items: readonly ListItem[], id: string): ListItem[] {
   return items.filter((i) => i.id !== id)
 }
 
-export function mergeItems(a: readonly CartItem[], b: readonly CartItem[]): CartItem[] {
+export function mergeItems(a: readonly ListItem[], b: readonly ListItem[]): ListItem[] {
   let out = [...a]
   for (const i of b) out = addItem(out, i.id, i.qty, i.scope)
   return out
 }
 
-export function encodeCart(items: readonly CartItem[]): string {
+export function encodeList(items: readonly ListItem[]): string {
   return items.map((i) => `${i.id}x${String(i.qty)}`).join(',')
 }
 
-export function decodeCart(s: string): { items: CartItem[]; invalid: string[] } {
-  let items: CartItem[] = []
+export function decodeList(s: string): { items: ListItem[]; invalid: string[] } {
+  let items: ListItem[] = []
   const invalid: string[] = []
   for (const raw of s.split(',')) {
     const part = raw.trim()
@@ -74,7 +74,7 @@ export function decodeCart(s: string): { items: CartItem[]; invalid: string[] } 
   return { items, invalid }
 }
 
-function isItem(v: unknown): v is CartItem {
+function isItem(v: unknown): v is ListItem {
   if (typeof v !== 'object' || v === null) return false
   const o = v as Record<string, unknown>
   return (
@@ -87,21 +87,21 @@ function isItem(v: unknown): v is CartItem {
   )
 }
 
-export function isCart(v: unknown): v is CartItem[] {
+export function isPartsList(v: unknown): v is ListItem[] {
   return Array.isArray(v) && v.every(isItem)
 }
 
 // Spreadsheets evaluate cells starting with = + - @ ("-23319-D9700" would become a formula): wrap them as ="...".
 const asText = (s: string) => (/^[=+\-@]/.test(s) ? `="${s.replace(/"/g, '""')}"` : s)
-const cells = (r: CartRow) => [r.reference, r.description, String(r.qty), r.section].map(asText)
+const cells = (r: ListRow) => [r.reference, r.description, String(r.qty), r.section].map(asText)
 
 const clean = (s: string) => s.replace(/[\t\r\n]+/g, ' ')
 const quote = (s: string) => (/[";\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s)
 
-export function toTSV(headers: readonly string[], rows: readonly CartRow[]): string {
+export function toTSV(headers: readonly string[], rows: readonly ListRow[]): string {
   return [headers, ...rows.map(cells)].map((r) => r.map(clean).join('\t')).join('\r\n')
 }
 
-export function toCSV(headers: readonly string[], rows: readonly CartRow[]): string {
+export function toCSV(headers: readonly string[], rows: readonly ListRow[]): string {
   return [headers, ...rows.map(cells)].map((r) => r.map(quote).join(';')).join('\r\n') + '\r\n'
 }

@@ -3,7 +3,7 @@ import { mdiBookOpenVariant, mdiHome, mdiMagnify, mdiPlaylistEdit } from '@mdi/j
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { useCart } from '@/composables/useCart'
+import { usePartsList } from '@/composables/usePartsList'
 import { useLang } from '@/composables/useLang'
 import { useLinks } from '@/composables/useLinks'
 import { switchLang, type Lang } from '@/lib/lang'
@@ -16,7 +16,7 @@ const route = useRoute()
 const router = useRouter()
 const lang = useLang()
 const links = useLinks()
-const cart = useCart()
+const partsList = usePartsList()
 const q = ref('')
 const langs: readonly Lang[] = ['en', 'fr']
 
@@ -116,10 +116,14 @@ function search() {
     <v-btn
       icon
       :to="links.to('/list', {}, false)"
-      :title="t('nav.cart')"
-      :aria-label="t('nav.cart')"
+      :title="t('nav.list')"
+      :aria-label="t('nav.list')"
     >
-      <v-badge :content="cart.count.value" :model-value="cart.count.value > 0" color="primary">
+      <v-badge
+        :content="partsList.count.value"
+        :model-value="partsList.count.value > 0"
+        color="primary"
+      >
         <v-icon :icon="mdiPlaylistEdit" />
       </v-badge>
     </v-btn>

@@ -2,18 +2,18 @@ import { describe, expect, it } from 'vitest'
 import {
   MAX_ITEMS,
   addItem,
-  decodeCart,
-  encodeCart,
-  isCart,
+  decodeList,
+  encodeList,
+  isPartsList,
   mergeItems,
   normalizeId,
   removeItem,
   setQty,
   toCSV,
   toTSV,
-} from '../cart'
+} from '../partsList'
 
-describe('cart', () => {
+describe('parts list', () => {
   it('normalizes ids', () => {
     expect(normalizeId(' aa2605 ')).toBe('AA2605')
     expect(normalizeId('AA02605')).toBe('AA2605') // the API answers with the canonical id
@@ -42,15 +42,15 @@ describe('cart', () => {
       { id: 'AA2605', qty: 2 },
       { id: 'AA5658', qty: 8 },
     ]
-    expect(encodeCart(items)).toBe('AA2605x2,AA5658x8')
-    expect(decodeCart('AA2605x2,aa5658x8')).toEqual({ items, invalid: [] })
-    expect(decodeCart('AA2605x2,AA2605x1,ZZ,AA1x0,,AA7x99999')).toEqual({
+    expect(encodeList(items)).toBe('AA2605x2,AA5658x8')
+    expect(decodeList('AA2605x2,aa5658x8')).toEqual({ items, invalid: [] })
+    expect(decodeList('AA2605x2,AA2605x1,ZZ,AA1x0,,AA7x99999')).toEqual({
       items: [{ id: 'AA2605', qty: 3 }],
       invalid: ['ZZ', 'AA1x0', 'AA7x99999'],
     })
-    expect(decodeCart('')).toEqual({ items: [], invalid: [] })
+    expect(decodeList('')).toEqual({ items: [], invalid: [] })
   })
-  it('merges carts', () => {
+  it('merges lists', () => {
     expect(
       mergeItems(
         [{ id: 'AA1', qty: 1 }],
@@ -64,11 +64,11 @@ describe('cart', () => {
       { id: 'AB2', qty: 1 },
     ])
   })
-  it('validates stored carts', () => {
-    expect(isCart([{ id: 'AA1', qty: 1 }])).toBe(true)
-    expect(isCart([{ id: 'AA1', qty: 1.5 }])).toBe(false)
-    expect(isCart([{ id: 'nope', qty: 1 }])).toBe(false)
-    expect(isCart({})).toBe(false)
+  it('validates stored lists', () => {
+    expect(isPartsList([{ id: 'AA1', qty: 1 }])).toBe(true)
+    expect(isPartsList([{ id: 'AA1', qty: 1.5 }])).toBe(false)
+    expect(isPartsList([{ id: 'nope', qty: 1 }])).toBe(false)
+    expect(isPartsList({})).toBe(false)
   })
   it('exports TSV and CSV', () => {
     const rows = [

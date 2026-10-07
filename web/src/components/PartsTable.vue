@@ -72,7 +72,7 @@ const indent = (l: Line) => ({ paddingLeft: `${String(Math.max(l.level - 1, 0) *
               :icon="mdiPlaylistPlus"
               size="small"
               variant="text"
-              :title="t('cart.add')"
+              :title="t('list.add')"
               @click.stop="emit('add', l)"
             />
           </td>

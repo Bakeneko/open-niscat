@@ -1,10 +1,17 @@
 import { computed } from 'vue'
-import { addItem, isCart, mergeItems, removeItem, setQty, type CartItem } from '@/lib/cart'
+import {
+  addItem,
+  isPartsList,
+  mergeItems,
+  removeItem,
+  setQty,
+  type ListItem,
+} from '@/lib/partsList'
 import type { Scope } from '@/lib/scope'
 import { useStored } from './useStored'
 
-export function useCart() {
-  const items = useStored<CartItem[]>('open-niscat.list', isCart, () => [])
+export function usePartsList() {
+  const items = useStored<ListItem[]>('open-niscat.list', isPartsList, () => [])
   return {
     items,
     count: computed(() => items.value.length),
@@ -17,10 +24,10 @@ export function useCart() {
     remove: (id: string) => {
       items.value = removeItem(items.value, id)
     },
-    replace: (next: CartItem[]) => {
+    replace: (next: ListItem[]) => {
       items.value = [...next]
     },
-    merge: (more: CartItem[]) => {
+    merge: (more: ListItem[]) => {
       items.value = mergeItems(items.value, more)
     },
     clear: () => {
