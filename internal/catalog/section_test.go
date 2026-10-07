@@ -33,6 +33,9 @@ func TestSectionWithVIN(t *testing.T) {
 	if l1.ID != "AA1" || l1.Description != "TENDEUR" || l1.From == nil || *l1.From != "1987-04" || l1.To == nil || *l1.To != "1987-04" || l1.InPeriod == nil || *l1.InPeriod {
 		t.Errorf("line 1 = %+v", l1)
 	}
+	if l1.Callout != "01-01" || l2.Callout != "01-02" {
+		t.Errorf("callouts = %q, %q (the second line has no item of its own)", l1.Callout, l2.Callout)
+	}
 	if l2.Item != "" || l2.ItemKey != "1" || l2.Level != 2 || l2.Cap != "10" || l2.InPeriod == nil || !*l2.InPeriod {
 		t.Errorf("line 2 = %+v", l2)
 	}

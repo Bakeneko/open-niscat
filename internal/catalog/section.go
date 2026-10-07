@@ -16,6 +16,7 @@ type Line struct {
 	Item           string   `json:"item"`
 	ItemKey        string   `json:"itemKey"`
 	Variant        string   `json:"variant"`
+	Callout        string   `json:"callout"`
 	Level          int      `json:"level"`
 	PartNo         string   `json:"partNo"`
 	PartKey        string   `json:"partKey"`
@@ -77,7 +78,7 @@ func scanLine(rows *sql.Rows) (LineRef, error) {
 	}
 	l := Line{
 		ID: fmt.Sprintf("%s%d", str(etd), pospie), Pospie: pospie, Mark: str(mark), Item: str(item),
-		ItemKey: ItemKey(str(itemEff)), Variant: str(variant),
+		ItemKey: ItemKey(str(itemEff)), Variant: str(variant), Callout: callout(str(itemEff), str(variant)),
 		PartNo: str(f[0]), PartKey: str(f[1]), Description: str(f[2]), Spec: str(f[3]), Qty: str(f[4]), Cap: str(f[5]),
 		ICA: str(f[6]), App: str(f[7]), Alternative: str(f[9]), AlternativeKey: str(f[10]),
 		KD: str(f[11]), PNC: str(f[12]),
@@ -92,6 +93,16 @@ func scanLine(rows *sql.Rows) (LineRef, error) {
 		l.From, l.To, l.period = yearMonth(p.From), yearMonth(p.To), &p
 	}
 	return LineRef{Etd: str(etd), Sec: strings.TrimPrefix(str(plate), str(etd)), Line: l}, nil
+}
+
+// callout labels a line "01-02": the drawing number, which NISCAT prints only on an item's first line (item)
+// but keeps on every line (item_eff), then the line's number within the item. A dash, not a slash, keeps it
+// apart from MM/YY periods.
+func callout(itemEff, variant string) string {
+	if variant == "" {
+		return itemEff
+	}
+	return itemEff + "-" + variant
 }
 
 // Section returns a plate. With a scope on the same catalog (series and period): applicability, period checks
