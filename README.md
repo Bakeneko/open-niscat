@@ -6,7 +6,7 @@ A single binary serves the catalog and its web interface: copy it next to a `dat
 
 The catalog data is **not** included: it is licensed by Nissan. You need your own `data/` folder (see [Data](#data)).
 
-*French version : [README.fr.md](README.fr.md).*
+*French version: [README.fr.md](README.fr.md).*
 
 ## Features
 
