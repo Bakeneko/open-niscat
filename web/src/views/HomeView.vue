@@ -7,6 +7,7 @@ import { useHistory } from '@/composables/useHistory'
 import { useLinks } from '@/composables/useLinks'
 import type { Meta } from '@/api/types'
 import { useMeta } from '@/composables/useMeta'
+import { formatYearMonth } from '@/lib/format'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -78,7 +79,13 @@ function search() {
       </v-list>
     </v-card>
     <div v-if="meta" class="text-caption text-medium-emphasis mt-4">
-      {{ t('app.version', { app: meta.appVersion, edition: meta.edition, data: meta.version }) }}
+      {{
+        t('app.version', {
+          app: meta.appVersion,
+          edition: formatYearMonth(meta.source.edition, true),
+          data: meta.version,
+        })
+      }}
     </div>
   </v-container>
 </template>

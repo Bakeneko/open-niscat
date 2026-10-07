@@ -2,17 +2,18 @@
 # No shell syntax (VAR=x prefixes, &&, rm, mkdir): use target-specific exported variables instead.
 
 DATA ?= ./data
+PYTHON ?= python
 
 # Explicit Go packages: ./... would walk into web/node_modules, which ships stray .go files.
 GOPKGS = ./cmd/... ./internal/... ./web
 
-.PHONY: test lint test-go lint-go fmt-go web web-install lint-web test-web run build build-go build-linux build-windows
+.PHONY: test lint test-go lint-go fmt-go web web-install lint-web test-web tools-install lint-tools test-tools run build build-go build-linux build-windows
 
 ## test: run all tests
-test: test-go test-web
+test: test-go test-web test-tools
 
 ## lint: run all linters (zero issues tolerated)
-lint: lint-go lint-web
+lint: lint-go lint-web lint-tools
 
 test-go:
 	go test $(GOPKGS)
@@ -37,6 +38,19 @@ lint-web:
 
 test-web:
 	npm --prefix web run test
+
+# Data tooling (tools/data): Python 3.12+; install its dependencies once with make tools-install.
+## tools-install: install the data tooling and its checkers (pillow, ruff, mypy, pytest)
+tools-install:
+	$(PYTHON) -m pip install -e tools/data[dev]
+
+lint-tools:
+	$(PYTHON) -m ruff check tools/data
+	$(PYTHON) -m ruff format --check tools/data
+	$(PYTHON) -m mypy --config-file tools/data/pyproject.toml tools/data
+
+test-tools:
+	$(PYTHON) -m pytest -q tools/data
 
 ## run: serve $(DATA) on 127.0.0.1:8080 without opening a browser
 run:

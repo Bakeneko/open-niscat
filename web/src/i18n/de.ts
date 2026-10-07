@@ -3,7 +3,7 @@ import type { en } from './en'
 export const de: typeof en = {
   app: {
     title: 'Open Niscat',
-    version: 'Open Niscat {app} · Daten {edition} ({data})',
+    version: 'Open Niscat {app} · NISCAT {edition} ({data})',
     loading: 'Wird geladen…',
     retry: 'Erneut versuchen',
     notFound: 'Seite nicht gefunden',

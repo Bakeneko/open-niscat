@@ -145,7 +145,8 @@ func NewDataDir(t testing.TB) string {
 	t.Helper()
 	dir := t.TempDir()
 	write(t, filepath.Join(dir, "manifest.json"),
-		`{"schema":1,"version":"test-1","edition":"Ed. TEST","built":"2026-10-06"}`)
+		`{"schema":1,"version":"2015.01-9","source":{"name":"NISCAT","publisher":"Nissan Motor Ibérica","edition":"2015-01"},`+
+			`"build":{"tool":"niscat-data","revision":9,"date":"2026-10-07"}}`)
 	for _, f := range files {
 		write(t, filepath.Join(dir, filepath.FromSlash(f)), "x")
 	}

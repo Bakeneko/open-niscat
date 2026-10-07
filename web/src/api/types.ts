@@ -5,9 +5,10 @@ export type YearMonth = string
 
 export interface Meta {
   schema: number
+  /** Data delivery: source edition YYYY.MM, then tool revision ("2015.01-2"). */
   version: string
-  edition: string
-  built: string
+  source: { name: string; publisher: string; edition: YearMonth }
+  build: { tool: string; revision: number; date: string }
   defaultLang: Lang
   /** Build version of the program (git tag or commit). */
   appVersion: string

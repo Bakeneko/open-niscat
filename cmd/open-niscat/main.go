@@ -103,7 +103,7 @@ func run(ctx context.Context, args []string) error {
 	}
 	srv := &http.Server{Handler: api.New(store, web.Dist(), lang, appVersion()), ReadHeaderTimeout: 10 * time.Second}
 	url := browserURL(listener.Addr())
-	slog.Info("open-niscat ready", "version", appVersion(), "url", url, "data", cfg.Data, "edition", store.Manifest().Edition)
+	slog.Info("open-niscat ready", "version", appVersion(), "url", url, "data", cfg.Data, "data_version", store.Manifest().Version)
 
 	served := make(chan error, 1)
 	go func() { served <- srv.Serve(listener) }()

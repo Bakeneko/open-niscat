@@ -23,8 +23,9 @@ func openFixture(t *testing.T) *catalog.Store {
 
 func TestOpen(t *testing.T) {
 	s := openFixture(t)
-	if got := s.Manifest().Edition; got != "Ed. TEST" {
-		t.Fatalf("edition = %q", got)
+	m := s.Manifest()
+	if m.Version != "2015.01-9" || m.Source.Edition != "2015-01" || m.Source.Name != "NISCAT" || m.Build.Revision != 9 || m.Build.Date != "2026-10-07" {
+		t.Fatalf("manifest = %+v", m)
 	}
 	if !filepath.IsAbs(s.DataDir()) {
 		t.Fatalf("DataDir must be absolute: %s", s.DataDir())
@@ -38,7 +39,10 @@ func TestOpenRejectsBadDataDirs(t *testing.T) {
 	}{
 		"no manifest":  {func(dir string) { _ = os.Remove(filepath.Join(dir, "manifest.json")) }, "manifest.json"},
 		"other schema": {func(dir string) { writeFile(t, filepath.Join(dir, "manifest.json"), `{"schema":2}`) }, "schema 2"},
-		"no database":  {func(dir string) { _ = os.Remove(filepath.Join(dir, "data.db")) }, "data.db"},
+		"old format": {func(dir string) {
+			writeFile(t, filepath.Join(dir, "manifest.json"), `{"schema":1,"version":"x","edition":"Ed. TEST","built":"2026-10-06"}`)
+		}, "rebuild"},
+		"no database": {func(dir string) { _ = os.Remove(filepath.Join(dir, "data.db")) }, "data.db"},
 		"no vin_rev": {func(dir string) {
 			_ = os.Remove(filepath.Join(dir, "data.db"))
 			writeFile(t, filepath.Join(dir, "data.db"), "")

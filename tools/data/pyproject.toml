@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "niscat-data"
+version = "1.0.0"
+description = "Build the Open Niscat data folder from a NISCAT 01/2015 installer"
+requires-python = ">=3.12"
+dependencies = ["pillow>=10"]
+
+[project.optional-dependencies]
+dev = ["mypy>=1.10", "pytest>=8", "ruff>=0.6"]
+
+[tool.setuptools]
+packages = ["niscat_data"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "COM812", # trailing commas: handled by ruff format
+  "CPY001", # no per-file copyright headers: the license is in LICENSE
+  "D105",   # magic methods are self-explanatory
+  "D107",   # __init__ documented on the class
+  "PLR2004", # magic values: NISCAT column widths and codes read better inline
+  "T201",   # the scripts report progress with print
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.pylint]
+max-args = 7
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D", "ANN", "S101", "S603", "S608", "PLR2004", "INP001"]
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+files = ["niscat_data", "tests", "*.py"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

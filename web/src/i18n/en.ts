@@ -1,7 +1,7 @@
 export const en = {
   app: {
     title: 'Open Niscat',
-    version: 'Open Niscat {app} · Data {edition} ({data})',
+    version: 'Open Niscat {app} · NISCAT {edition} ({data})',
     loading: 'Loading…',
     retry: 'Retry',
     notFound: 'Page not found',

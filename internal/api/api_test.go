@@ -53,7 +53,10 @@ func TestJSONEndpoints(t *testing.T) {
 		check  func(map[string]any) bool
 	}{
 		{"/api/meta", 200, func(m map[string]any) bool {
-			return m["edition"] == "Ed. TEST" && m["defaultLang"] == "fr" && m["appVersion"] == "v1.2.3"
+			source, _ := m["source"].(map[string]any)
+			build, _ := m["build"].(map[string]any)
+			return m["version"] == "2015.01-9" && source["edition"] == "2015-01" && build["date"] == "2026-10-07" &&
+				m["defaultLang"] == "fr" && m["appVersion"] == "v1.2.3"
 		}},
 		{"/api/vin/VSKBEC220U0990494?lang=fr", 200, func(m map[string]any) bool {
 			v := m["vehicle"].(map[string]any)

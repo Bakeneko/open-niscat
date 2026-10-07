@@ -25,7 +25,7 @@ The `data/` folder holds the catalog converted from a NISCAT installation (editi
 
 ```
 data/
-├── manifest.json   schema, data version and edition
+├── manifest.json   data schema, data version, source edition, build information
 ├── data.db         SQLite database (catalogs, VINs, model codes, sections, parts, hotspots)
 ├── img/<series>/   parts plates (PNG)
 ├── gindex/<series>/  group index drawings (PNG)
@@ -33,6 +33,16 @@ data/
 ```
 
 The program opens `data.db` read-only and refuses a folder whose `manifest.json` schema it does not support.
+
+### Build the data folder
+
+If you own the NISCAT 01/2015 installer, build the folder yourself (Windows, Python 3.12+ with Pillow):
+
+```
+python tools/data/build_data.py --installer <installer folder> --out data
+```
+
+See [tools/data/README.md](tools/data/README.md) for the requirements, options and other systems.
 
 ## Run
 
@@ -61,7 +71,8 @@ Requirements: Go 1.26+, Node 24+, GNU Make, golangci-lint 2.x.
 
 ```
 make web-install   # once, and after a change of web/package-lock.json
-make lint test     # Go + frontend
+make tools-install # once: Python dependencies of tools/data (Pillow, ruff, mypy, pytest)
+make lint test     # Go, frontend and data tooling
 make build         # frontend, then binaries for Linux and Windows in dist/
 ```
 

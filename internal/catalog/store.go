@@ -27,12 +27,26 @@ var (
 	ErrInvalid = errors.New("invalid argument")
 )
 
-// Manifest describes a data directory (data/manifest.json).
+// Manifest describes a data directory (data/manifest.json, written by tools/data).
 type Manifest struct {
-	Schema  int    `json:"schema"`
-	Version string `json:"version"`
-	Edition string `json:"edition"`
-	Built   string `json:"built"`
+	Schema  int            `json:"schema"`  // data.db schema, must equal SchemaVersion
+	Version string         `json:"version"` // data delivery: source edition YYYY.MM, then tool revision ("2015.01-2")
+	Source  ManifestSource `json:"source"`
+	Build   ManifestBuild  `json:"build"`
+}
+
+// ManifestSource identifies the catalogue the data comes from.
+type ManifestSource struct {
+	Name      string `json:"name"`
+	Publisher string `json:"publisher"`
+	Edition   string `json:"edition"` // YYYY-MM
+}
+
+// ManifestBuild records how the data folder was produced.
+type ManifestBuild struct {
+	Tool     string `json:"tool"`
+	Revision int    `json:"revision"`
+	Date     string `json:"date"` // YYYY-MM-DD
 }
 
 // Lang is a supported interface/data language.
@@ -75,6 +89,10 @@ func Open(ctx context.Context, dataDir string) (*Store, error) {
 	}
 	if manifest.Schema != SchemaVersion {
 		return nil, fmt.Errorf("data schema %d is not supported by this build (expected %d)", manifest.Schema, SchemaVersion)
+	}
+	// The schema number tracks data.db, not the manifest layout: an older manifest still parses, with blanks.
+	if manifest.Version == "" || manifest.Source.Edition == "" {
+		return nil, errors.New("manifest.json is outdated or incomplete: rebuild the data folder with tools/data")
 	}
 	dbPath := filepath.Join(abs, "data.db")
 	if _, err := os.Stat(dbPath); err != nil {

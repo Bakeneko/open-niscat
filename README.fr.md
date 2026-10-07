@@ -25,7 +25,7 @@ Le dossier `data/` contient le catalogue converti depuis une installation de NIS
 
 ```
 data/
-├── manifest.json   schéma, version des données et édition
+├── manifest.json   schéma, version des données, édition source, informations de construction
 ├── data.db         base SQLite (catalogues, VIN, codes modèle, sections, pièces, repères)
 ├── img/<série>/    planches de pièces (PNG)
 ├── gindex/<série>/ dessins des index de groupe (PNG)
@@ -33,6 +33,16 @@ data/
 ```
 
 Le programme ouvre `data.db` en lecture seule et refuse un dossier dont le schéma indiqué dans `manifest.json` n'est pas pris en charge.
+
+### Construire le dossier de données
+
+Si vous possédez le programme d'installation de NISCAT 01/2015, construisez le dossier vous-même (Windows, Python 3.12+ avec Pillow) :
+
+```
+python tools/data/build_data.py --installer <dossier d'installation> --out data
+```
+
+Voir [tools/data/README.md](tools/data/README.md) (en anglais) pour les prérequis, les options et les autres systèmes.
 
 ## Lancer
 
@@ -61,7 +71,8 @@ Prérequis : Go 1.26+, Node 24+, GNU Make, golangci-lint 2.x.
 
 ```
 make web-install   # une fois, puis après chaque modification de web/package-lock.json
-make lint test     # Go + frontend
+make tools-install # une fois : dépendances Python de tools/data (Pillow, ruff, mypy, pytest)
+make lint test     # Go, frontend et outillage des données
 make build         # frontend, puis binaires Linux et Windows dans dist/
 ```
 

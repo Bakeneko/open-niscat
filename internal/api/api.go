@@ -113,7 +113,7 @@ func (s *server) langAndScope(r *http.Request) (catalog.Lang, *catalog.Scope, er
 func (s *server) meta(*http.Request) (any, error) {
 	m := s.store.Manifest()
 	return map[string]any{
-		"schema": m.Schema, "version": m.Version, "edition": m.Edition, "built": m.Built,
+		"schema": m.Schema, "version": m.Version, "source": m.Source, "build": m.Build,
 		"defaultLang": string(s.defaultLang), "appVersion": s.appVersion,
 	}, nil
 }
