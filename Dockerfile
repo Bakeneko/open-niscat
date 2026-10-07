@@ -4,7 +4,7 @@
 FROM --platform=$BUILDPLATFORM node:24-alpine AS web
 WORKDIR /src/web
 COPY web/package.json web/package-lock.json ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 COPY web/ ./
 RUN npm run build
 
@@ -13,12 +13,17 @@ FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS build
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
+ENV CGO_ENABLED=0
+ARG TARGETOS TARGETARCH
+# Dependencies compiled in their own layer (the pure Go SQLite is the slow part): reused until go.mod changes.
+# Keep -trimpath identical to the final build, or Go's build cache misses and recompiles everything.
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath modernc.org/sqlite github.com/BurntSushi/toml
 COPY cmd/ cmd/
 COPY internal/ internal/
 COPY web/*.go web/
 COPY --from=web /src/web/dist web/dist
-ARG TARGETOS TARGETARCH VERSION=dev
-RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+ARG VERSION=dev
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
     go build -trimpath -ldflags "-s -w -X main.version=$VERSION" -o /out/open-niscat ./cmd/open-niscat
 
 FROM alpine:3.24
