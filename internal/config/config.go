@@ -1,4 +1,5 @@
-// Package config loads open-niscat settings from defaults, an optional TOML file and command-line flags.
+// Package config loads open-niscat settings from defaults, an optional TOML file, environment variables and
+// command-line flags.
 package config
 
 import (
@@ -8,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/BurntSushi/toml"
@@ -39,9 +41,13 @@ type fileConfig struct {
 	DefaultLang *string `toml:"default_lang"`
 }
 
+// EnvPrefix starts the environment variables that override the file: OPEN_NISCAT_DATA, OPEN_NISCAT_ADDR,
+// OPEN_NISCAT_OPEN_BROWSER and OPEN_NISCAT_DEFAULT_LANG (an empty value counts as unset).
+const EnvPrefix = "OPEN_NISCAT_"
+
 // Load returns the configuration: defaults, then the TOML file (--config, or FileName in baseDir if present),
-// then flags. Relative paths resolve against baseDir (defaults), the file's directory (file) or the working
-// directory (flags).
+// then environment variables, then flags. Relative paths resolve against baseDir (defaults), the file's
+// directory (file) or the working directory (environment, flags).
 func Load(args []string, baseDir string) (Config, error) {
 	flags := flag.NewFlagSet("open-niscat", flag.ContinueOnError)
 	configPath := flags.String("config", "", "path to the TOML configuration file")
@@ -70,6 +76,9 @@ func Load(args []string, baseDir string) (Config, error) {
 		path = *configPath
 	}
 	if err := applyFile(&cfg, path, set["config"]); err != nil {
+		return Config{}, err
+	}
+	if err := applyEnv(&cfg); err != nil {
 		return Config{}, err
 	}
 
@@ -131,6 +140,26 @@ func applyFile(cfg *Config, path string, required bool) error {
 	}
 	if fc.DefaultLang != nil {
 		cfg.DefaultLang = *fc.DefaultLang
+	}
+	return nil
+}
+
+func applyEnv(cfg *Config) error {
+	if v := os.Getenv(EnvPrefix + "DATA"); v != "" {
+		cfg.Data = v
+	}
+	if v := os.Getenv(EnvPrefix + "ADDR"); v != "" {
+		cfg.Addr = v
+	}
+	if v := os.Getenv(EnvPrefix + "OPEN_BROWSER"); v != "" {
+		b, err := strconv.ParseBool(v)
+		if err != nil {
+			return fmt.Errorf("%sOPEN_BROWSER must be true or false, got %q", EnvPrefix, v)
+		}
+		cfg.OpenBrowser = b
+	}
+	if v := os.Getenv(EnvPrefix + "DEFAULT_LANG"); v != "" {
+		cfg.DefaultLang = v
 	}
 	return nil
 }

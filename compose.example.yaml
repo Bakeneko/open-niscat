@@ -7,5 +7,6 @@ services:
     volumes:
       - ./data:/data:ro
     restart: unless-stopped
-    # Extra options, e.g. the language offered on the home page:
-    # command: ["--default-lang", "fr"]
+    # Language offered on the home page (en, fr, es or de):
+    # environment:
+    #   OPEN_NISCAT_DEFAULT_LANG: fr

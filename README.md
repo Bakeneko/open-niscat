@@ -57,17 +57,17 @@ Download the binary for your system from the [releases page](https://github.com/
    - Linux and macOS: make it executable first (`chmod +x open-niscat-*`).
    - macOS blocks the unsigned binary on first launch: right click → Open, or `xattr -d com.apple.quarantine open-niscat-darwin-arm64`.
 
-Options (also settable in `open-niscat.toml` next to the binary — see `open-niscat.example.toml`):
+Options (also settable in `open-niscat.toml` next to the binary — see `open-niscat.example.toml` — or as environment variables):
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--data` | `./data` next to the binary | data directory |
-| `--addr` | `127.0.0.1:8080` | listen address; `0.0.0.0:8080` to allow other machines of the local network |
-| `--open-browser` | `true` | open the default browser on startup |
-| `--default-lang` | `en` | language offered on `/` (`en`, `fr`, `es` or `de`) |
-| `--config` | `open-niscat.toml` next to the binary | configuration file |
+| Flag | Environment variable | Default | Meaning |
+|---|---|---|---|
+| `--data` | `OPEN_NISCAT_DATA` | `./data` next to the binary | data directory |
+| `--addr` | `OPEN_NISCAT_ADDR` | `127.0.0.1:8080` | listen address; `0.0.0.0:8080` to allow other machines of the local network |
+| `--open-browser` | `OPEN_NISCAT_OPEN_BROWSER` | `true` | open the default browser on startup |
+| `--default-lang` | `OPEN_NISCAT_DEFAULT_LANG` | `en` | language offered on `/` (`en`, `fr`, `es` or `de`) |
+| `--config` | | `open-niscat.toml` next to the binary | configuration file |
 
-Priority: flags, then the file, then defaults. An unknown key or invalid value stops the program with a message.
+Priority: flags, then environment variables, then the file, then defaults. A relative path given by a flag or a variable is relative to the working directory, one from the file to the file's folder. An unknown key or invalid value stops the program with a message.
 
 ### Docker
 
@@ -83,7 +83,7 @@ or without compose:
 docker run -d --name open-niscat --restart unless-stopped -p 8080:8080 -v ./data:/data:ro ghcr.io/bakeneko/open-niscat
 ```
 
-- Options go after the image name (`… ghcr.io/bakeneko/open-niscat --default-lang fr`) or in `command:` in `compose.yaml`. Keep the container port at 8080 and change the published port instead (`-p 80:8080`).
+- Settings are environment variables (`-e OPEN_NISCAT_DEFAULT_LANG=fr`, or `environment:` in `compose.yaml`); the image already sets `OPEN_NISCAT_DATA=/data`, `OPEN_NISCAT_ADDR=0.0.0.0:8080` and `OPEN_NISCAT_OPEN_BROWSER=false`. Keep the container port at 8080 and change the published port instead (`-p 80:8080`).
 - On Linux, the data files must be readable by the container user (uid 10001), e.g. `chmod -R a+rX data`.
 - `GET /health` answers 200 while the catalog is readable; the image health check uses it (`docker ps` shows `healthy`).
 

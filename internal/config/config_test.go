@@ -128,3 +128,40 @@ func TestDefaultLangAcceptsTheFourDataLanguages(t *testing.T) {
 		}
 	}
 }
+
+func TestEnvironmentOverridesFileAndFlagsOverrideEnvironment(t *testing.T) {
+	base := t.TempDir()
+	writeConfig(t, base, "addr = \"0.0.0.0:9000\"\ndefault_lang = \"de\"\n")
+	dataDir := t.TempDir()
+	t.Setenv("OPEN_NISCAT_DATA", dataDir)
+	t.Setenv("OPEN_NISCAT_ADDR", "0.0.0.0:7000")
+	t.Setenv("OPEN_NISCAT_OPEN_BROWSER", "false")
+	t.Setenv("OPEN_NISCAT_DEFAULT_LANG", "fr")
+	cfg, err := config.Load(nil, base)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := config.Config{Data: dataDir, Addr: "0.0.0.0:7000", OpenBrowser: false, DefaultLang: "fr"}
+	if cfg != want {
+		t.Fatalf("got %+v, want %+v", cfg, want)
+	}
+	cfg, err = config.Load([]string{"--default-lang", "es"}, base)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.DefaultLang != "es" {
+		t.Fatalf("flag did not override the environment: %+v", cfg)
+	}
+}
+
+func TestEnvironmentErrors(t *testing.T) {
+	t.Setenv("OPEN_NISCAT_OPEN_BROWSER", "maybe")
+	if _, err := config.Load(nil, t.TempDir()); err == nil || !strings.Contains(err.Error(), "OPEN_NISCAT_OPEN_BROWSER") {
+		t.Fatalf("invalid boolean: %v", err)
+	}
+	t.Setenv("OPEN_NISCAT_OPEN_BROWSER", "")
+	t.Setenv("OPEN_NISCAT_DEFAULT_LANG", "it")
+	if _, err := config.Load(nil, t.TempDir()); err == nil || !strings.Contains(err.Error(), "default_lang") {
+		t.Fatalf("invalid language: %v", err)
+	}
+}

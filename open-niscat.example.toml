@@ -1,6 +1,6 @@
 # Example configuration for open-niscat.
 # Copy it next to the binary as "open-niscat.toml" and adjust. Every key is optional;
-# command-line flags (--data, --addr, --open-browser, --default-lang) override this file.
+# environment variables (OPEN_NISCAT_DATA, ...) and command-line flags (--data, ...) override this file.
 
 # Data directory: data.db, manifest.json, img/, gindex/, cinfo/.
 # A relative path is resolved against the directory of this file.

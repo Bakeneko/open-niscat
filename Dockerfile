@@ -35,7 +35,11 @@ RUN addgroup -S -g 10001 app && adduser -S -D -H -u 10001 -G app app
 COPY --from=build /out/open-niscat /usr/local/bin/open-niscat
 USER app
 EXPOSE 8080
-# Probes the default --addr port: keep 8080 inside the container, remap with ports instead.
+# Settings as environment variables, so that compose or docker run -e can override any of them.
+ENV OPEN_NISCAT_DATA=/data \
+    OPEN_NISCAT_ADDR=0.0.0.0:8080 \
+    OPEN_NISCAT_OPEN_BROWSER=false
+# Probes port 8080: keep it inside the container, remap with ports instead.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s CMD wget -q --spider http://127.0.0.1:8080/health
 # The NISCAT data is not in the image: mount it read-only at /data.
-ENTRYPOINT ["open-niscat", "--data", "/data", "--addr", "0.0.0.0:8080", "--open-browser=false"]
+ENTRYPOINT ["open-niscat"]

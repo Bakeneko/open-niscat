@@ -57,17 +57,17 @@ Téléchargez le binaire de votre système sur la [page des releases](https://gi
    - Linux et macOS : rendez-le d'abord exécutable (`chmod +x open-niscat-*`).
    - macOS bloque le binaire non signé au premier lancement : clic droit → Ouvrir, ou `xattr -d com.apple.quarantine open-niscat-darwin-arm64`.
 
-Options (également réglables dans `open-niscat.toml` à côté du binaire — voir `open-niscat.example.toml`) :
+Options (également réglables dans `open-niscat.toml` à côté du binaire — voir `open-niscat.example.toml` — ou par variables d'environnement) :
 
-| Option | Valeur par défaut | Rôle |
-|---|---|---|
-| `--data` | `./data` à côté du binaire | dossier des données |
-| `--addr` | `127.0.0.1:8080` | adresse d'écoute ; `0.0.0.0:8080` pour autoriser les autres machines du réseau local |
-| `--open-browser` | `true` | ouvrir le navigateur par défaut au démarrage |
-| `--default-lang` | `en` | langue proposée sur `/` (`en`, `fr`, `es` ou `de`) |
-| `--config` | `open-niscat.toml` à côté du binaire | fichier de configuration |
+| Option | Variable d'environnement | Valeur par défaut | Rôle |
+|---|---|---|---|
+| `--data` | `OPEN_NISCAT_DATA` | `./data` à côté du binaire | dossier des données |
+| `--addr` | `OPEN_NISCAT_ADDR` | `127.0.0.1:8080` | adresse d'écoute ; `0.0.0.0:8080` pour autoriser les autres machines du réseau local |
+| `--open-browser` | `OPEN_NISCAT_OPEN_BROWSER` | `true` | ouvrir le navigateur par défaut au démarrage |
+| `--default-lang` | `OPEN_NISCAT_DEFAULT_LANG` | `en` | langue proposée sur `/` (`en`, `fr`, `es` ou `de`) |
+| `--config` | | `open-niscat.toml` à côté du binaire | fichier de configuration |
 
-Priorité : options de la ligne de commande, puis fichier, puis valeurs par défaut. Une clé inconnue ou une valeur invalide arrête le programme avec un message.
+Priorité : options de la ligne de commande, puis variables d'environnement, puis fichier, puis valeurs par défaut. Un chemin relatif donné par une option ou une variable part du dossier courant, celui du fichier part du dossier du fichier. Une clé inconnue ou une valeur invalide arrête le programme avec un message.
 
 ### Docker
 
@@ -83,7 +83,7 @@ ou sans compose :
 docker run -d --name open-niscat --restart unless-stopped -p 8080:8080 -v ./data:/data:ro ghcr.io/bakeneko/open-niscat
 ```
 
-- Les options se placent après le nom de l'image (`… ghcr.io/bakeneko/open-niscat --default-lang fr`) ou dans `command:` de `compose.yaml`. Gardez le port 8080 dans le conteneur et changez plutôt le port publié (`-p 80:8080`).
+- Les réglages sont des variables d'environnement (`-e OPEN_NISCAT_DEFAULT_LANG=fr`, ou `environment:` dans `compose.yaml`) ; l'image fixe déjà `OPEN_NISCAT_DATA=/data`, `OPEN_NISCAT_ADDR=0.0.0.0:8080` et `OPEN_NISCAT_OPEN_BROWSER=false`. Gardez le port 8080 dans le conteneur et changez plutôt le port publié (`-p 80:8080`).
 - Sous Linux, les fichiers de données doivent être lisibles par l'utilisateur du conteneur (uid 10001), par exemple `chmod -R a+rX data`.
 - `GET /health` répond 200 tant que le catalogue est lisible ; le contrôle de santé de l'image l'utilise (`docker ps` affiche `healthy`).
 
