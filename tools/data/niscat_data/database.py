@@ -21,9 +21,9 @@ SCHEMA = """
 CREATE TABLE catalog (            -- niscat.mdb/SERIES: one row per catalogue entry shown in the UI
   etd TEXT, grupo TEXT, model TEXT, cmodel TEXT, drive TEXT, date_from TEXT, date_to TEXT,
   serie TEXT, data TEXT, orden TEXT, langs TEXT);
-CREATE TABLE vin (                -- vn.mdb/v1t
+CREATE TABLE vin (                -- vn.mdb/v1t (some VINs appear twice; a few are 11 or 15 characters)
   vin TEXT, vin_raw TEXT, codenis TEXT, etd TEXT, tipo TEXT, prodata TEXT);
-CREATE TABLE grupo (etd TEXT, grupo TEXT, esp TEXT);
+CREATE TABLE grupo (etd TEXT, grupo TEXT, esp TEXT);  -- catalogue periods (G01, G02) and their date text
 CREATE TABLE main_group (         -- INDIGRAL: A=engine ... K=misc
   etd TEXT, cetd TEXT, lang TEXT, label TEXT);
 CREATE TABLE section (            -- <lang>_sec: one section = one plate = one drawing
@@ -46,7 +46,7 @@ CREATE TABLE infosec (            -- INFOSEC / INFOSECF: section applicability b
   c01 TEXT, c02 TEXT, c03 TEXT, c04 TEXT, c05 TEXT, c06 TEXT, c07 TEXT, c08 TEXT, c09 TEXT, c10 TEXT);
 CREATE TABLE hotspot (            -- KView zones (*.ini next to drawings); caption = item no. or section no.
   etd TEXT, kind TEXT, image TEXT, caption TEXT, x INTEGER, y INTEGER, w INTEGER, h INTEGER);
-CREATE TABLE cinfo (etd TEXT, file TEXT);
+CREATE TABLE cinfo (etd TEXT, file TEXT);           -- documents (PDF) of each series, served from cinfo/
 """
 
 INDEXES = """
@@ -192,6 +192,7 @@ def _load_parts(db: sqlite3.Connection, etd: str, lang: str, rows: list[Row]) ->
             last_item = item
         number, replaced = text(r, "PIE164"), text(r, "REE164")
         levels = tuple(text(r, f"IND{i}164") for i in range(1, 6))
+        # OBS164 ("Obs." on screen) holds the Nissan PNC; REE164 is the reference this line replaces.
         _insert(
             db,
             "part",
@@ -218,9 +219,8 @@ def _load_series(db: sqlite3.Connection, etd: str, folder: Path) -> None:
             continue  # a series may lack a language (some exist in English only)
         for r in read_jsonl(folder / f"{letter}_sec.jsonl"):
             number = text(r, "NUMSEC")
-            plate = (
-                f"{etd}{number}".upper()
-            )  # the plate key, also the drawing name (AA230 -> img/AA/AA230.png)
+            # The plate key is also the drawing name (AA230 -> img/AA/AA230.png).
+            plate = f"{etd}{number}".upper()
             values = (etd, lang, plate, text(r, "CODIGRUP"), number, text(r, "NOMSEC"), text(r, "NOTAS"))
             _insert(db, "section", (*values, text(r, "DESDE"), text(r, "HASTA")))
         _load_parts(db, etd, lang, list(read_jsonl(folder / f"{letter}_PAR.jsonl")))
@@ -244,6 +244,7 @@ def _load_catalogs(db: sqlite3.Connection, staging: Path) -> None:
         _insert(db, "catalog", (*head, *tail))
     for r in read_jsonl(staging / "spa2__vn" / "v1t.jsonl"):
         raw = r.get("VIN")
+        # MIMODEL holds the series code (etd), not a model.
         values = (normalize_vin(raw), raw, text(r, "CODENIS"), text(r, "MIMODEL"), text(r, "TIPO"))
         _insert(db, "vin", (*values, text(r, "PRODATA")))
 
@@ -256,6 +257,8 @@ def _optimise(db: sqlite3.Connection) -> None:
     db.commit()
     db.execute("ANALYZE")
     db.commit()
+    # VACUUM may renumber the rowids of tables without an INTEGER PRIMARY KEY; it keeps them here because no
+    # row is ever deleted. part_fts (content_rowid) and the rowid ordering in the Go code rely on that.
     db.execute("VACUUM")
 
 

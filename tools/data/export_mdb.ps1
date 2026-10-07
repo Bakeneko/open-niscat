@@ -51,7 +51,6 @@ public static class MdbDump {
         return Esc(v.ToString());
     }
 
-    // Returns row count.
     public static long DumpTable(OleDbConnection c, string table, string outPath) {
         var cmd = c.CreateCommand();
         cmd.CommandText = "SELECT * FROM [" + table + "]";
