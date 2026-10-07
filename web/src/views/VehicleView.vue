@@ -12,6 +12,7 @@ import { useHistory } from '@/composables/useHistory'
 import { useLang } from '@/composables/useLang'
 import { useLinks } from '@/composables/useLinks'
 import { useScope } from '@/composables/useScope'
+import { usePageTitle } from '@/composables/usePageTitle'
 import { scopeLabel, scopeToQuery } from '@/lib/scope'
 
 const { t } = useI18n()
@@ -45,6 +46,13 @@ watch(vehicle.data, (v) => {
       `${scopeLabel(current.value)} · ${v.catalog.model} ${v.catalog.cmodel}`,
       route.fullPath,
     )
+})
+
+usePageTitle(() => {
+  if (vehicle.loading.value) return undefined // data may still be the previous vehicle's
+  const v = vehicle.data.value
+  if (v === null || current.value === null) return null
+  return `${scopeLabel(current.value)} · ${v.catalog.model} ${v.catalog.cmodel}`
 })
 </script>
 

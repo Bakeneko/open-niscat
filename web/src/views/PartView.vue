@@ -8,6 +8,7 @@ import ErrorAlert from '@/components/ErrorAlert.vue'
 import { useFetch } from '@/composables/useFetch'
 import { useLang } from '@/composables/useLang'
 import { useLinks } from '@/composables/useLinks'
+import { usePageTitle } from '@/composables/usePageTitle'
 import { formatRange } from '@/lib/format'
 import { refPath } from '@/lib/refs'
 
@@ -19,6 +20,13 @@ const partRef = computed(() => String(route.params.ref))
 const { data, error, loading, reload } = useFetch<PartInfo>(() =>
   apiPath(`/api/parts/${encodeURIComponent(partRef.value)}`, { lang: lang.value }),
 )
+
+usePageTitle(() => {
+  // While loading, data may still be the previous page's: keep the previous title until it arrives.
+  if (loading.value) return undefined
+  if (data.value === null) return null
+  return `${data.value.partNo} — ${data.value.description}`
+})
 </script>
 
 <template>

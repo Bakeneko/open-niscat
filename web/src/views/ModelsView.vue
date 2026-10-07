@@ -9,6 +9,7 @@ import { useFetch } from '@/composables/useFetch'
 import { useLang } from '@/composables/useLang'
 import { useLinks } from '@/composables/useLinks'
 import { useScope } from '@/composables/useScope'
+import { usePageTitle } from '@/composables/usePageTitle'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -46,6 +47,8 @@ function use(model: string) {
   adopt({ cat: cat.value, model })
   void router.push(links.to('/vehicle', { cat: cat.value, model }, false))
 }
+
+usePageTitle(() => `${t('models.title')} · ${cat.value}`)
 </script>
 
 <template>

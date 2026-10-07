@@ -4,11 +4,14 @@ import type { Catalog } from '@/api/types'
 import ErrorAlert from '@/components/ErrorAlert.vue'
 import { useFetch } from '@/composables/useFetch'
 import { useLinks } from '@/composables/useLinks'
+import { usePageTitle } from '@/composables/usePageTitle'
 import { formatRange } from '@/lib/format'
 
 const { t } = useI18n()
 const links = useLinks()
 const { data, error, loading, reload } = useFetch<Catalog[]>(() => '/api/catalogs')
+
+usePageTitle(() => t('catalogs.title'))
 </script>
 
 <template>

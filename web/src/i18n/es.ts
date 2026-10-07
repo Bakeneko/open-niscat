@@ -101,6 +101,8 @@ export const es: typeof en = {
     section: 'Sección',
   },
   search: {
+    title: 'Búsqueda',
+    titleQuery: 'Búsqueda: {q}',
     placeholder: 'Buscar…',
     parts: 'Piezas',
     sections: 'Secciones',

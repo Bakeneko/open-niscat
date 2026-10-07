@@ -10,6 +10,7 @@ import { useFetch } from '@/composables/useFetch'
 import { useLang } from '@/composables/useLang'
 import { useLinks } from '@/composables/useLinks'
 import { useScope } from '@/composables/useScope'
+import { usePageTitle } from '@/composables/usePageTitle'
 import { formatYearMonth } from '@/lib/format'
 
 const { t } = useI18n()
@@ -31,6 +32,8 @@ function use() {
   adopt({ vin: v })
   void router.push(links.to('/vehicle', { vin: v }, false))
 }
+
+usePageTitle(() => vin.value)
 </script>
 
 <template>

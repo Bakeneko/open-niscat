@@ -11,6 +11,7 @@ import { useFetch } from '@/composables/useFetch'
 import { useLang } from '@/composables/useLang'
 import { useLinks } from '@/composables/useLinks'
 import { useScope } from '@/composables/useScope'
+import { usePageTitle } from '@/composables/usePageTitle'
 import { formatRange } from '@/lib/format'
 import { groupHotspots, sectionMatchesCaption } from '@/lib/hotspots'
 import { scopeToQuery } from '@/lib/scope'
@@ -75,6 +76,13 @@ const titles = computed(() => {
       .join('\n')
   }
   return out
+})
+
+usePageTitle(() => {
+  // While loading, data may still be the previous page's: keep the previous title until it arrives.
+  if (loading.value) return undefined
+  if (data.value === null) return null
+  return `${data.value.group.code} — ${data.value.group.label}`
 })
 </script>
 

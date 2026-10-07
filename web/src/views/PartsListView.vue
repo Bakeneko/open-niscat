@@ -11,6 +11,7 @@ import { useFetch } from '@/composables/useFetch'
 import { useLang } from '@/composables/useLang'
 import { useLinks } from '@/composables/useLinks'
 import { useNotify } from '@/composables/useNotify'
+import { usePageTitle } from '@/composables/usePageTitle'
 import { decodeList, encodeList, toCSV, toTSV, type ListItem, type ListRow } from '@/lib/partsList'
 import { localizedPath } from '@/lib/lang'
 import { readable } from '@/lib/format'
@@ -123,6 +124,8 @@ function clearList() {
 function removeMissing() {
   for (const id of data.value?.missing ?? []) partsList.remove(id)
 }
+
+usePageTitle(() => (shared.value ? t('list.shared') : t('list.title')))
 </script>
 
 <template>

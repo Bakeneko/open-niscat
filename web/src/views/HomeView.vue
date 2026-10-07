@@ -8,6 +8,7 @@ import { useLang } from '@/composables/useLang'
 import { useLinks } from '@/composables/useLinks'
 import type { Meta } from '@/api/types'
 import { useMeta } from '@/composables/useMeta'
+import { usePageTitle } from '@/composables/usePageTitle'
 import { formatYearMonth } from '@/lib/format'
 import { dedupeHistory } from '@/lib/history'
 import { switchLang } from '@/lib/lang'
@@ -44,6 +45,8 @@ function search() {
   const text = q.value.trim()
   if (text !== '') void router.push(links.to('/search', { q: text }))
 }
+
+usePageTitle(() => null)
 </script>
 
 <template>

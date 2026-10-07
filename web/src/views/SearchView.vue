@@ -11,6 +11,7 @@ import { useFetch, type Fetched } from '@/composables/useFetch'
 import { useLang } from '@/composables/useLang'
 import { useLinks } from '@/composables/useLinks'
 import { useScope } from '@/composables/useScope'
+import { usePageTitle } from '@/composables/usePageTitle'
 import { formatRange, formatYearMonth, readable } from '@/lib/format'
 import { refPath } from '@/lib/refs'
 import { scopeToQuery } from '@/lib/scope'
@@ -121,6 +122,8 @@ function setAll(v: boolean | null) {
   else delete query.all
   void router.replace({ query })
 }
+
+usePageTitle(() => (q.value === '' ? t('search.title') : t('search.titleQuery', { q: q.value })))
 </script>
 
 <template>

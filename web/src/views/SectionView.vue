@@ -16,8 +16,10 @@ import { useLang } from '@/composables/useLang'
 import { useLinks } from '@/composables/useLinks'
 import { useNotify } from '@/composables/useNotify'
 import { useScope } from '@/composables/useScope'
+import { usePageTitle } from '@/composables/usePageTitle'
 import { formatRange } from '@/lib/format'
 import { scopeToQuery } from '@/lib/scope'
+import { sectionTitle } from '@/lib/title'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -98,6 +100,14 @@ watch([selected, data], async ([key, s]) => {
   document
     .querySelector(`.parts-table tr[data-item="${CSS.escape(key)}"]`)
     ?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+})
+
+usePageTitle(() => {
+  const s = data.value
+  // While loading, data may still be the previous plate's: keep the previous title until it arrives.
+  if (loading.value) return undefined
+  if (s === null) return null
+  return sectionTitle(s, s.lines.find((l) => l.itemKey === selected.value)?.item ?? null)
 })
 </script>
 

@@ -99,6 +99,8 @@ export const en = {
     section: 'Section',
   },
   search: {
+    title: 'Search',
+    titleQuery: 'Search: {q}',
     placeholder: 'Search…',
     parts: 'Parts',
     sections: 'Sections',

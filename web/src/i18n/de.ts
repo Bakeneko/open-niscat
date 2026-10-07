@@ -101,6 +101,8 @@ export const de: typeof en = {
     section: 'Abschnitt',
   },
   search: {
+    title: 'Suche',
+    titleQuery: 'Suche: {q}',
     placeholder: 'Suchen…',
     parts: 'Teile',
     sections: 'Abschnitte',
