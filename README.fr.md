@@ -2,7 +2,7 @@
 
 Consultez le catalogue de pièces NISCAT (véhicules utilitaires légers et camions Nissan Motor Ibérica, édition 01/2015) dans un navigateur : identification d'un véhicule par son VIN, navigation dans les vues éclatées, recherche de pièces, suivi des remplacements, et constitution d'une liste de pièces à copier, exporter ou partager.
 
-Un seul binaire sert le catalogue et son interface web : copiez-le à côté d'un dossier `data/` sur un poste d'atelier et ouvrez un navigateur. Les téléphones et tablettes du réseau local peuvent aussi l'utiliser.
+Un seul binaire sert le catalogue et son interface web : copiez-le à côté d'un dossier `data/` sur un poste d'atelier et ouvrez un navigateur, ou lancez-le avec Docker sur un serveur. Les téléphones et tablettes du réseau local peuvent aussi l'utiliser.
 
 Les données du catalogue ne sont **pas** fournies : elles sont sous licence Nissan. Il vous faut votre propre dossier `data/` (voir [Données](#données)).
 
@@ -46,12 +46,16 @@ Voir [tools/data/README.md](tools/data/README.md) (en anglais) pour les prérequ
 
 ## Lancer
 
+Téléchargez le binaire de votre système sur la [page des releases](https://github.com/Bakeneko/open-niscat/releases) : `windows-amd64`, `linux-amd64`, `linux-arm64` ou `darwin-arm64` (Mac Apple Silicon). `SHA256SUMS` permet de vérifier le téléchargement (`sha256sum -c SHA256SUMS --ignore-missing`). Vous pouvez aussi le compiler vous-même (voir [Compiler](#compiler)).
+
 1. Placez le binaire et le dossier `data/` côte à côte :
    ```
-   open-niscat-windows-amd64.exe   (ou open-niscat-linux-amd64)
+   open-niscat-windows-amd64.exe   (ou open-niscat-linux-amd64, …)
    data/
    ```
 2. Lancez le binaire (double-clic sous Windows). Le navigateur s'ouvre sur http://127.0.0.1:8080/.
+   - Linux et macOS : rendez-le d'abord exécutable (`chmod +x open-niscat-*`).
+   - macOS bloque le binaire non signé au premier lancement : clic droit → Ouvrir, ou `xattr -d com.apple.quarantine open-niscat-darwin-arm64`.
 
 Options (également réglables dans `open-niscat.toml` à côté du binaire — voir `open-niscat.example.toml`) :
 
@@ -65,6 +69,24 @@ Options (également réglables dans `open-niscat.toml` à côté du binaire — 
 
 Priorité : options de la ligne de commande, puis fichier, puis valeurs par défaut. Une clé inconnue ou une valeur invalide arrête le programme avec un message.
 
+### Docker
+
+L'image `ghcr.io/bakeneko/open-niscat` (amd64 et arm64) ne contient que le programme : montez votre dossier `data/` en lecture seule sur `/data`. Copiez [compose.example.yaml](compose.example.yaml) en `compose.yaml` à côté du dossier `data/`, puis :
+
+```
+docker compose up -d
+```
+
+ou sans compose :
+
+```
+docker run -d --name open-niscat --restart unless-stopped -p 8080:8080 -v ./data:/data:ro ghcr.io/bakeneko/open-niscat
+```
+
+- Les options se placent après le nom de l'image (`… ghcr.io/bakeneko/open-niscat --default-lang fr`) ou dans `command:` de `compose.yaml`. Gardez le port 8080 dans le conteneur et changez plutôt le port publié (`-p 80:8080`).
+- Sous Linux, les fichiers de données doivent être lisibles par l'utilisateur du conteneur (uid 10001), par exemple `chmod -R a+rX data`.
+- `GET /health` répond 200 tant que le catalogue est lisible ; le contrôle de santé de l'image l'utilise (`docker ps` affiche `healthy`).
+
 ## Compiler
 
 Prérequis : Go 1.26+, Node 24+, GNU Make, golangci-lint 2.x.
@@ -73,12 +95,18 @@ Prérequis : Go 1.26+, Node 24+, GNU Make, golangci-lint 2.x.
 make web-install   # une fois, puis après chaque modification de web/package-lock.json
 make tools-install # une fois : dépendances Python de tools/data (Pillow, ruff, mypy, pytest)
 make lint test     # Go, frontend et outillage des données
-make build         # frontend, puis binaires Linux et Windows dans dist/
+make build         # frontend, puis les quatre binaires de release dans dist/
 ```
 
 Développement : `make run` (API sur :8080 avec `./data`) et `npm --prefix web run dev` (Vite avec rechargement à chaud sur :5173, relaie `/api` et `/files`).
 
 Les tests utilisent un petit catalogue synthétique ; les tests sur le vrai catalogue ne s'exécutent que si `data/` est présent.
+
+`make docker` construit l'image pour votre machine (`open-niscat:<version>`).
+
+### Publier une version
+
+Créez un tag de version et poussez-le : `git tag v1.2.0 && git push origin v1.2.0`. Le workflow de release lance les vérifications, attache les quatre binaires et `SHA256SUMS` à une release GitHub et publie l'image en `1.2.0`, `1.2` et `latest`. Un suffixe (`v1.2.0-rc.1`, `v1.2.0-beta.1`) crée une pré-version, publiée sous son seul tag.
 
 ## Licence et données
 
