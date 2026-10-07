@@ -36,7 +36,7 @@ function search() {
 </script>
 
 <template>
-  <v-container class="py-6" style="max-width: 760px">
+  <v-container class="home py-6" style="max-width: 760px">
     <v-card class="mb-4">
       <v-card-text>
         <v-text-field
@@ -78,7 +78,7 @@ function search() {
         />
       </v-list>
     </v-card>
-    <div v-if="meta" class="text-caption text-medium-emphasis mt-4">
+    <footer v-if="meta" class="text-caption text-medium-emphasis text-center pt-6 mt-auto">
       {{
         t('app.version', {
           app: meta.appVersion,
@@ -86,6 +86,15 @@ function search() {
           data: meta.version,
         })
       }}
-    </div>
+    </footer>
   </v-container>
 </template>
+
+<style scoped>
+/* Fills the viewport under the app bar so the version footer sits at the bottom of short pages. */
+.home {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - var(--v-layout-top, 0px));
+}
+</style>
