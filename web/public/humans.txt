@@ -1,0 +1,14 @@
+/* AUTHOR */
+Name: Stéphane Dupont
+Nickname: Bakeneko
+Location: Prissé, France
+Bluesky: @bakeneko.fr
+Github: @Bakeneko
+
+/* SITE */
+Project: Open Niscat
+Repository: https://github.com/Bakeneko/open-niscat
+Language: English, French
+Components: Go, SQLite, Vue, Vuetify, Vite
+License: MIT (source code)
+Data: the NISCAT catalog data belongs to Nissan and is not distributed with this software.
