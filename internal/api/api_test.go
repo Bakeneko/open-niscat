@@ -124,7 +124,7 @@ func TestFiles(t *testing.T) {
 
 func TestSPAAndHeaders(t *testing.T) {
 	h := newServer(t)
-	for _, url := range []string{"/", "/fr/section/AA/230A?vin=X", "/cart?items=AA1x2"} {
+	for _, url := range []string{"/", "/fr/section/AA/230A?vin=X", "/list?items=AA1x2"} {
 		rec := get(t, h, url)
 		if rec.Code != 200 || rec.Body.String() != "<html>app</html>" {
 			t.Errorf("%s: %d %q", url, rec.Code, rec.Body.String())
