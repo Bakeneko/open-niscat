@@ -6,7 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { usePartsList } from '@/composables/usePartsList'
 import { useLang } from '@/composables/useLang'
 import { useLinks } from '@/composables/useLinks'
-import { switchLang, type Lang } from '@/lib/lang'
+import { LANGS, switchLang, type Lang } from '@/lib/lang'
 import { saveIfChanged } from '@/lib/storage'
 import FlagIcon from './FlagIcon.vue'
 import ScopeChip from './ScopeChip.vue'
@@ -18,7 +18,7 @@ const lang = useLang()
 const links = useLinks()
 const partsList = usePartsList()
 const q = ref('')
-const langs: readonly Lang[] = ['en', 'fr']
+const langs = LANGS
 
 watch(
   () => route.query.q,

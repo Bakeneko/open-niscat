@@ -19,6 +19,28 @@ const id = useId()
     <rect x="1" width="1" height="2" fill="#fff" />
     <rect x="2" width="1" height="2" fill="#ce1126" />
   </svg>
+  <!-- Spain without its coat of arms, unreadable at this size. -->
+  <svg
+    v-else-if="lang === 'es'"
+    class="flag"
+    viewBox="0 0 3 2"
+    preserveAspectRatio="xMidYMid slice"
+    aria-hidden="true"
+  >
+    <rect width="3" height="2" fill="#aa151b" />
+    <rect y="0.5" width="3" height="1" fill="#f1bf00" />
+  </svg>
+  <svg
+    v-else-if="lang === 'de'"
+    class="flag"
+    viewBox="0 0 5 3"
+    preserveAspectRatio="xMidYMid slice"
+    aria-hidden="true"
+  >
+    <rect width="5" height="1" fill="#000" />
+    <rect y="1" width="5" height="1" fill="#dd0000" />
+    <rect y="2" width="5" height="1" fill="#ffce00" />
+  </svg>
   <svg
     v-else
     class="flag"

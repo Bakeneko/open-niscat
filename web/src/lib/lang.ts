@@ -1,26 +1,27 @@
-export type Lang = 'en' | 'fr'
+/** Interface languages: those of the NISCAT data. English has no URL prefix, the others /fr, /es, /de. */
+export const LANGS = ['en', 'fr', 'es', 'de'] as const
+export type Lang = (typeof LANGS)[number]
 
 export function isLang(v: unknown): v is Lang {
-  return v === 'en' || v === 'fr'
+  return LANGS.some((l) => l === v)
 }
 
 export function langFromParam(p: unknown): Lang {
-  return p === 'fr' ? 'fr' : 'en'
+  return isLang(p) ? p : 'en'
 }
 
 export function localizedPath(lang: Lang, path: string): string {
   const p = path.startsWith('/') ? path : `/${path}`
   if (lang === 'en') return p
-  return p === '/' ? '/fr' : `/fr${p}`
+  return p === '/' ? `/${lang}` : `/${lang}${p}`
 }
 
-/** Toggles the /fr prefix of a full path (path + query + hash). */
+/** Replaces the language prefix of a full path (path + query + hash). */
 export function switchLang(fullPath: string, lang: Lang): string {
   const cut = fullPath.search(/[?#]/)
   const path = cut === -1 ? fullPath : fullPath.slice(0, cut)
   const rest = cut === -1 ? '' : fullPath.slice(cut)
-  let bare = path
-  if (path === '/fr') bare = '/'
-  else if (path.startsWith('/fr/')) bare = path.slice(3)
+  const m = /^\/(fr|es|de)(\/.*)?$/.exec(path)
+  const bare = m === null ? path : (m[2] ?? '/')
   return localizedPath(lang, bare) + rest
 }

@@ -11,7 +11,7 @@ declare module 'vue-router' {
   }
 }
 
-const L = '/:lang(fr)?'
+const L = '/:lang(fr|es|de)?'
 
 const routes: RouteRecordRaw[] = [
   { path: L, component: () => import('@/views/HomeView.vue') },
@@ -59,7 +59,7 @@ router.beforeEach(async (to) => {
       (await useMeta()
         .then((m) => m.defaultLang)
         .catch(() => 'en' as const))
-    if (pref === 'fr') return { path: '/fr', replace: true }
+    if (pref !== 'en') return { path: `/${pref}`, replace: true }
   }
 
   // Pages that need a vehicle get the remembered one when the URL has none (spec §5).
