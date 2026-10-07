@@ -1,18 +1,29 @@
 <script setup lang="ts">
 import { mdiMagnify } from '@mdi/js'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useHistory } from '@/composables/useHistory'
+import { useLang } from '@/composables/useLang'
 import { useLinks } from '@/composables/useLinks'
 import type { Meta } from '@/api/types'
 import { useMeta } from '@/composables/useMeta'
 import { formatYearMonth } from '@/lib/format'
+import { dedupeHistory } from '@/lib/history'
+import { switchLang } from '@/lib/lang'
 
 const { t } = useI18n()
 const router = useRouter()
 const links = useLinks()
+const lang = useLang()
 const history = useHistory()
+// The home page shows the latest few; the rest of the stored history is one click away.
+const HISTORY_SHOWN = 8
+const allHistory = ref(false)
+const historyList = computed(() => dedupeHistory(history.entries.value)) // older entries too
+const shownHistory = computed(() =>
+  allHistory.value ? historyList.value : historyList.value.slice(0, HISTORY_SHOWN),
+)
 const vin = ref('')
 const q = ref('')
 const meta = ref<Meta | null>(null)
@@ -67,16 +78,28 @@ function search() {
         <v-btn :to="links.to('/catalogs', {}, false)">{{ t('home.browse') }}</v-btn>
       </v-card-actions>
     </v-card>
-    <v-card v-if="history.entries.value.length > 0">
-      <v-card-title class="text-subtitle-1">{{ t('home.history') }}</v-card-title>
+    <v-card v-if="historyList.length > 0">
+      <v-card-title class="d-flex align-center text-subtitle-1">
+        {{ t('home.history') }}
+        <v-spacer />
+        <v-btn size="small" variant="text" @click="history.clear()">{{
+          t('home.historyClear')
+        }}</v-btn>
+      </v-card-title>
       <v-list density="compact">
+        <!-- Stored without a language prefix: entries open in the current language. -->
         <v-list-item
-          v-for="h in history.entries.value"
+          v-for="h in shownHistory"
           :key="h.path"
-          :to="h.path"
+          :to="switchLang(h.path, lang)"
           :title="h.label"
         />
       </v-list>
+      <v-card-actions v-if="historyList.length > HISTORY_SHOWN">
+        <v-btn size="small" @click="allHistory = !allHistory">{{
+          allHistory ? t('home.historyLess') : t('home.historyAll', { n: historyList.length })
+        }}</v-btn>
+      </v-card-actions>
     </v-card>
     <footer v-if="meta" class="text-caption text-medium-emphasis text-center pt-6 mt-auto">
       {{

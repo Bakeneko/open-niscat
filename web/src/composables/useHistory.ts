@@ -8,5 +8,8 @@ export function useHistory() {
     push: (kind: HistoryEntry['kind'], label: string, path: string) => {
       entries.value = pushHistory(entries.value, { kind, label, path, at: Date.now() })
     },
+    clear: () => {
+      entries.value = []
+    },
   }
 }
