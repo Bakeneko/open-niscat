@@ -241,6 +241,7 @@ func (s *Store) Models(ctx context.Context, etd, grupo string, lang Lang) ([]Mod
 }
 
 func (s *Store) vinCounts(ctx context.Context, etd string) (map[string]int, error) {
+	// DISTINCT: v1t lists some VINs twice.
 	rows, err := s.db.QueryContext(ctx, "SELECT codenis, COUNT(DISTINCT vin) FROM vin WHERE etd = ? GROUP BY codenis", etd)
 	if err != nil {
 		return nil, fmt.Errorf("count VINs: %w", err)
@@ -329,6 +330,7 @@ func (s *Store) IdentifyVIN(ctx context.Context, input string, lang Lang) (VINRe
 	if !errors.Is(err, ErrNotFound) {
 		return VINResult{}, err
 	}
+	// The tail goes into a GLOB pattern: drop its metacharacters.
 	tail := strings.Map(func(r rune) rune {
 		if strings.ContainsRune("*?[]", r) {
 			return -1
@@ -348,6 +350,8 @@ func (s *Store) IdentifyVIN(ctx context.Context, input string, lang Lang) (VINRe
 	return VINResult{Candidates: candidates}, nil
 }
 
+// vinsEndingWith searches a suffix as a prefix GLOB on the reversed VIN, so SQLite can use the vin_rev index.
+// v1t has no period: it comes from modelnis (a model code belongs to one period of its series).
 func (s *Store) vinsEndingWith(ctx context.Context, tail string, limit int) ([]VINMatch, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT DISTINCT v.vin, v.codenis, v.etd, v.prodata,
 		(SELECT m.grupo FROM modelnis m WHERE m.etd = v.etd AND m.codenis = v.codenis LIMIT 1)

@@ -76,6 +76,7 @@ type LinesResult struct {
 	Missing []string  `json:"missing"`
 }
 
+// NISCAT texts are upper-case ASCII without accents: strip them from queries so "écrou" finds "ECROU".
 var accents = strings.NewReplacer(
 	"à", "a", "â", "a", "ä", "a", "é", "e", "è", "e", "ê", "e", "ë", "e", "î", "i", "ï", "i",
 	"ô", "o", "ö", "o", "ù", "u", "û", "u", "ü", "u", "ç", "c",
@@ -88,15 +89,16 @@ func words(q string) []string {
 	return strings.FieldsFunc(accents.Replace(q), func(r rune) bool { return !unicode.IsLetter(r) && !unicode.IsDigit(r) })
 }
 
-// looksLikeRef reports whether q should be searched as a part reference prefix.
+// looksLikeRef reports whether q may be a part reference typed with any separators ("23300D97", "233-00D9701"):
+// one word of at least 5 letters or digits, including a digit. It is ORed with full-text search (PNCs look alike).
 func looksLikeRef(q string) bool {
 	q = strings.TrimSpace(q)
 	key := NormalizeRef(q)
 	return !strings.ContainsAny(q, " \t") && len(key) >= 5 && strings.ContainsAny(key, "0123456789")
 }
 
-// Search runs a free-text search; with a scope on a model, only applicable sections are searched.
-// At most maxMatches rows are read; Truncated reports that more exist.
+// Search runs a free-text search, restricted to the scope's series and, with a model, to its applicable sections
+// (the VIN search ignores the scope). At most maxMatches rows are read; Truncated reports that more exist.
 func (s *Store) Search(ctx context.Context, q SearchQuery, sc *Scope, lang Lang) (SearchResult, error) {
 	limit, offset := q.Limit, max(q.Offset, 0)
 	if limit <= 0 {
@@ -192,6 +194,7 @@ func scopeFilter(sc *Scope, applicable map[string]bool, etdColumn, column string
 	return append(conds, column+" IN ("+placeholders(len(secs))+")"), args
 }
 
+// ftsExpression turns each word into a quoted prefix term (quoting neutralises FTS5 syntax); terms are ANDed.
 func ftsExpression(q string) string {
 	tokens := words(q)
 	expr := make([]string, len(tokens))

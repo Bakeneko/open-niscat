@@ -12,10 +12,10 @@ import (
 type Line struct {
 	ID             string   `json:"id"`
 	Pospie         int      `json:"pospie"`
-	Mark           string   `json:"mark"`
+	Mark           string   `json:"mark"` // S164: "*", "#" or blank; meaning unknown, shown as NISCAT does
 	Item           string   `json:"item"`
 	ItemKey        string   `json:"itemKey"`
-	Variant        string   `json:"variant"`
+	Variant        string   `json:"variant"` // SEC164: line number within the item
 	Callout        string   `json:"callout"`
 	Level          int      `json:"level"`
 	PartNo         string   `json:"partNo"`
@@ -23,16 +23,16 @@ type Line struct {
 	Description    string   `json:"description"`
 	Spec           string   `json:"spec"`
 	Qty            string   `json:"qty"`
-	Cap            string   `json:"cap"`
-	ICA            string   `json:"ica"`
-	App            string   `json:"app"`
+	Cap            string   `json:"cap"` // shown in brackets after the quantity (meaning undocumented)
+	ICA            string   `json:"ica"` // probably an interchangeability code ("2-0")
+	App            string   `json:"app"` // "applicable to model", free text
 	From           *string  `json:"from"`
 	To             *string  `json:"to"`
 	InPeriod       *bool    `json:"inPeriod,omitempty"`
-	Alternative    string   `json:"alternative"`
+	Alternative    string   `json:"alternative"` // REE164: the reference this one replaces (NISCAT: "alternative")
 	AlternativeKey string   `json:"alternativeKey"`
-	KD             string   `json:"kd"`
-	PNC            string   `json:"pnc"`
+	KD             string   `json:"kd"`  // KDF164: "*", probably knock-down kits
+	PNC            string   `json:"pnc"` // OBS164 ("Obs." on screen): the Nissan part name code
 	Latest         *RefLink `json:"latest,omitempty"`
 	period         *Period
 }
@@ -76,6 +76,7 @@ func scanLine(rows *sql.Rows) (LineRef, error) {
 	if err != nil {
 		return LineRef{}, fmt.Errorf("scan line: %w", err)
 	}
+	// The id is series + POSPIE, which is the same in every language table, so ids survive a language switch.
 	l := Line{
 		ID: fmt.Sprintf("%s%d", str(etd), pospie), Pospie: pospie, Mark: str(mark), Item: str(item),
 		ItemKey: ItemKey(str(itemEff)), Variant: str(variant), Callout: callout(str(itemEff), str(variant)),
@@ -83,6 +84,7 @@ func scanLine(rows *sql.Rows) (LineRef, error) {
 		ICA: str(f[6]), App: str(f[7]), Alternative: str(f[9]), AlternativeKey: str(f[10]),
 		KD: str(f[11]), PNC: str(f[12]),
 	}
+	// ind1..ind5 hold one "-" in the column of the line's level (ind1 = assembly, ind2 = component...).
 	for i := range ind {
 		if str(ind[i]) == "-" {
 			l.Level = i + 1
@@ -105,9 +107,8 @@ func callout(itemEff, variant string) string {
 	return itemEff + "-" + variant
 }
 
-// Section returns a plate. With a scope on the same catalog (series and period): applicability, period checks
-// and neighbours restricted to applicable sections. With a scope on another catalog (another series, or a section
-// absent from the scope's period): not applicable, no period checks, unfiltered neighbours.
+// Section returns a plate. A scope on the same series and period adds applicability, period checks and
+// applicable-only neighbours; any other scope marks the section not applicable.
 func (s *Store) Section(ctx context.Context, etd, sec string, sc *Scope, lang Lang) (Section, error) {
 	etd, sec = strings.ToUpper(etd), strings.ToUpper(sec)
 	var code, name, notes, from, to, en sql.NullString
@@ -154,6 +155,7 @@ func (s *Store) Section(ctx context.Context, etd, sec string, sc *Scope, lang La
 		ok := applicable[sec]
 		out.Applicable = &ok
 	}
+	// Like NISCAT, lines are never filtered by vehicle: DATAPLIC only marks them in or out of period.
 	if sameCatalog && sc.ProdDate > 0 {
 		for i := range out.Lines {
 			if p := out.Lines[i].period; p != nil {

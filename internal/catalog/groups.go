@@ -49,7 +49,8 @@ type infosecRow struct {
 	cols     [10]string
 }
 
-// applies implements the NISCAT rule (INFOSECF): dates when known, '0' and '-' are wildcards.
+// applies is NISCAT's INFOSECF rule: production date within desdat..finsdat (when known), and every cXX equal
+// to the model's value or a wildcard ("0" = any, "-" = unused attribute, blank).
 func applies(r *infosecRow, vals []string, prod int) bool {
 	if prod > 0 && (prod < r.from || prod > r.to) {
 		return false
@@ -70,6 +71,7 @@ func (s *Store) applicableSections(ctx context.Context, sc *Scope) (map[string]b
 	if sc == nil || sc.Model == "" {
 		return nil, nil
 	}
+	// Only INFOSECF (variant F) counts: Niscat.exe never reads INFOSEC.
 	rows, err := s.db.QueryContext(ctx, `SELECT secc, desdat, finsdat, c01, c02, c03, c04, c05, c06, c07, c08, c09, c10
 		FROM infosec WHERE etd = ? AND grupo = ? AND variant = 'F'`, sc.Etd, sc.Grupo)
 	if err != nil {
@@ -83,6 +85,7 @@ func (s *Store) applicableSections(ctx context.Context, sc *Scope) (map[string]b
 		if err := rows.Scan(&secc, &from, &to, &c[0], &c[1], &c[2], &c[3], &c[4], &c[5], &c[6], &c[7], &c[8], &c[9]); err != nil {
 			return nil, fmt.Errorf("section applicability: %w", err)
 		}
+		// desdat/finsdat are YYYYMM; NISCAT writes 999999 for "no end", and a blank bound reads the same way.
 		r := infosecRow{secc: strings.ToUpper(str(secc)), from: atoiOr(str(from), 0), to: atoiOr(str(to), 999999)}
 		for i := range c {
 			r.cols[i] = str(c[i])
@@ -104,7 +107,8 @@ func atoiOr(s string, fallback int) int {
 	return fallback
 }
 
-// Groups lists the main groups of a series with their index drawing.
+// Groups lists the main groups of a series with their index drawing; like NISCAT, they are never filtered by
+// vehicle. Rows come in rowid order, the source table order, which is NISCAT's display order.
 func (s *Store) Groups(ctx context.Context, etd string, lang Lang) ([]Group, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT g.cetd, COALESCE(l.label, g.label, g.cetd)
 		FROM main_group g

@@ -27,9 +27,8 @@ type PartInfo struct {
 	Next        []RefLink `json:"next"`
 }
 
-// candidates returns the distinct references next to key, latest period start first (ties: higher key first).
-// Forward: rows whose alternative (ree) is key, i.e. its successors. Backward: the alternatives of key's rows,
-// i.e. its predecessors.
+// candidates returns the references next to key in the replacement graph (a line's ree is the reference it
+// replaces): successors when forward, predecessors otherwise. Latest period start first, then higher key.
 func (s *Store) candidates(ctx context.Context, key string, forward bool) ([]RefLink, error) {
 	query := "SELECT part_key, part_no, dataplic FROM part WHERE ree_key = ? AND part_key IS NOT NULL AND part_key <> ?"
 	if !forward {
@@ -135,7 +134,6 @@ func (s *Store) Part(ctx context.Context, ref string, lang Lang) (PartInfo, erro
 		return PartInfo{}, fmt.Errorf("%w: empty reference", ErrInvalid)
 	}
 	cond, args := s.langFilter("p", lang)
-	// cond only contains fixed SQL and "?" placeholders (see langFilter).
 	rows, err := s.db.QueryContext(ctx, "SELECT "+lineColumns+" FROM part p WHERE p.part_key = ? AND "+cond+ //nolint:gosec // no user input is concatenated
 		" ORDER BY p.etd, p.plate, p.pospie", append([]any{key}, args...)...)
 	if err != nil {

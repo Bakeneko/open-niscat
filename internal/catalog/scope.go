@@ -87,7 +87,8 @@ func (s *Store) scopeFromVIN(ctx context.Context, vin string) (*Scope, error) {
 	return &Scope{VIN: vin, Etd: str(etd), Grupo: grupo, Model: str(model), ProdDate: date, values: values}, nil
 }
 
-// modelRow returns the grupo and c01..c10 of a model code; grupo "" matches any period.
+// modelRow returns the grupo and c01..c10 of a model code; grupo "" matches any period (a model code belongs
+// to a single period, so a VIN, which has none, resolves to it).
 func (s *Store) modelRow(ctx context.Context, etd, grupo, model string) (modelGrupo string, values [10]string, err error) {
 	var g sql.NullString
 	var c [10]sql.NullString

@@ -78,7 +78,7 @@ func (s *server) json(fn handlerFunc) http.HandlerFunc {
 
 func lang(r *http.Request) (catalog.Lang, error) {
 	v := r.URL.Query().Get("lang")
-	if v == "" {
+	if v == "" { // English: defaultLang only tells the front which language to offer first (/api/meta)
 		return catalog.LangEN, nil
 	}
 	l, err := catalog.ParseLang(v)
