@@ -4,7 +4,7 @@ import type { Scope } from '@/lib/scope'
 import { useStored } from './useStored'
 
 export function useCart() {
-  const items = useStored<CartItem[]>('open-niscat.cart', isCart, () => [])
+  const items = useStored<CartItem[]>('open-niscat.list', isCart, () => [])
   return {
     items,
     count: computed(() => items.value.length),

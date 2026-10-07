@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { mdiBookOpenVariant, mdiCart, mdiHome, mdiMagnify } from '@mdi/js'
+import { mdiBookOpenVariant, mdiHome, mdiMagnify, mdiPlaylistEdit } from '@mdi/js'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -11,7 +11,6 @@ import { saveIfChanged } from '@/lib/storage'
 import FlagIcon from './FlagIcon.vue'
 import ScopeChip from './ScopeChip.vue'
 
-const emit = defineEmits<{ cart: [] }>()
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
@@ -114,9 +113,14 @@ function search() {
         </v-list-item>
       </v-list>
     </v-menu>
-    <v-btn icon :title="t('nav.cart')" :aria-label="t('nav.cart')" @click="emit('cart')">
+    <v-btn
+      icon
+      :to="links.to('/list', {}, false)"
+      :title="t('nav.cart')"
+      :aria-label="t('nav.cart')"
+    >
       <v-badge :content="cart.count.value" :model-value="cart.count.value > 0" color="primary">
-        <v-icon :icon="mdiCart" />
+        <v-icon :icon="mdiPlaylistEdit" />
       </v-badge>
     </v-btn>
   </v-app-bar>

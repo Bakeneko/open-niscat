@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/AppHeader.vue'
-import CartDrawer from '@/components/CartDrawer.vue'
 import { useLang } from '@/composables/useLang'
 import { useNotify } from '@/composables/useNotify'
 
 const { locale } = useI18n()
 const lang = useLang()
-const cartOpen = ref(false)
 const { message, visible } = useNotify()
 
 watch(
@@ -23,8 +21,7 @@ watch(
 
 <template>
   <v-app>
-    <AppHeader @cart="cartOpen = !cartOpen" />
-    <CartDrawer v-model="cartOpen" />
+    <AppHeader />
     <v-main>
       <RouterView />
     </v-main>

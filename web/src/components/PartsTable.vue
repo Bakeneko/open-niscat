@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { mdiCartPlus } from '@mdi/js'
+import { mdiPlaylistPlus } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import type { Line } from '@/api/types'
 import { useLinks } from '@/composables/useLinks'
@@ -69,7 +69,7 @@ const indent = (l: Line) => ({ paddingLeft: `${String(Math.max(l.level - 1, 0) *
           </td>
           <td class="no-print">
             <v-btn
-              :icon="mdiCartPlus"
+              :icon="mdiPlaylistPlus"
               size="small"
               variant="text"
               :title="t('cart.add')"

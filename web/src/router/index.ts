@@ -39,7 +39,7 @@ const routes: RouteRecordRaw[] = [
     meta: { scoped: true },
   },
   { path: `${L}/part/:ref`, component: () => import('@/views/PartView.vue') },
-  { path: `${L}/cart`, component: () => import('@/views/CartView.vue') },
+  { path: `${L}/list`, component: () => import('@/views/CartView.vue') },
   { path: '/:pathMatch(.*)*', component: () => import('@/views/NotFoundView.vue') },
 ]
 

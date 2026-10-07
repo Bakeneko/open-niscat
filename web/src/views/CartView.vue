@@ -82,14 +82,14 @@ function copyTable() {
   void copy(toTSV(headers.value, rows.value), t('cart.copied'))
 }
 function shareLink() {
-  const url = `${window.location.origin}${localizedPath(lang.value, '/cart')}?items=${encodeCart(items.value)}`
+  const url = `${window.location.origin}${localizedPath(lang.value, '/list')}?items=${encodeCart(items.value)}`
   void copy(url, t('cart.linkCopied'))
 }
 function downloadCSV() {
   const blob = new Blob(['﻿', toCSV(headers.value, rows.value)], { type: 'text/csv;charset=utf-8' })
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
-  a.download = `open-niscat-cart-${new Date().toISOString().slice(0, 10)}.csv`
+  a.download = `open-niscat-parts-list-${new Date().toISOString().slice(0, 10)}.csv`
   a.click()
   URL.revokeObjectURL(a.href)
 }
@@ -101,7 +101,7 @@ function adoptShared(mode: 'replace' | 'merge') {
   if (s === null) return
   if (mode === 'replace') cart.replace(s.items)
   else cart.merge(s.items)
-  void router.replace(links.to('/cart', {}, false))
+  void router.replace(links.to('/list', {}, false))
 }
 // Only whole quantities >= 1 are applied: an emptied field while typing must not delete the line.
 function setQty(id: string, v: unknown) {
