@@ -108,6 +108,8 @@ Tests use a small synthetic catalog; the tests against the real catalog run only
 
 Tag a version and push the tag: `git tag v1.2.0 && git push origin v1.2.0`. The release workflow runs the checks, attaches the four binaries and `SHA256SUMS` to a GitHub release and publishes the image as `1.2.0`, `1.2` and `latest`. A suffix (`v1.2.0-rc.1`, `v1.2.0-beta.1`) makes a pre-release, published under its own tag only.
 
+A release can also be published from the GitHub web interface with a new tag: the workflow then attaches the files to it and keeps its notes. The image tags still follow the tag name, not the pre-release checkbox.
+
 ## License and data
 
 The source code is released under the [MIT License](LICENSE). The catalog data belongs to Nissan: it is not distributed with this project and must never be committed or published.

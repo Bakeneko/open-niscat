@@ -108,6 +108,8 @@ Les tests utilisent un petit catalogue synthétique ; les tests sur le vrai cata
 
 Créez un tag de version et poussez-le : `git tag v1.2.0 && git push origin v1.2.0`. Le workflow de release lance les vérifications, attache les quatre binaires et `SHA256SUMS` à une release GitHub et publie l'image en `1.2.0`, `1.2` et `latest`. Un suffixe (`v1.2.0-rc.1`, `v1.2.0-beta.1`) crée une pré-version, publiée sous son seul tag.
 
+Une release peut aussi être publiée depuis l'interface web de GitHub avec un nouveau tag : le workflow y attache alors les fichiers et garde ses notes. Les tags de l'image suivent toujours le nom du tag, pas la case « pre-release ».
+
 ## Licence et données
 
 Le code source est publié sous [licence MIT](LICENSE). Les données du catalogue appartiennent à Nissan : elles ne sont pas distribuées avec ce projet et ne doivent jamais être commitées ni publiées.
