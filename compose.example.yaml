@@ -1,0 +1,11 @@
+# Copy as compose.yaml next to the data folder, adjust if needed, then: docker compose up -d
+services:
+  open-niscat:
+    image: ghcr.io/bakeneko/open-niscat:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/data:ro
+    restart: unless-stopped
+    # Extra options, e.g. the language offered on the home page:
+    # command: ["--default-lang", "fr"]

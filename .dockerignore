@@ -1,0 +1,11 @@
+# Allowlist: only the sources the image is built from enter the build context, never the NISCAT data.
+*
+!go.mod
+!go.sum
+!cmd
+!internal
+!web
+web/node_modules
+web/dist
+web/coverage
+**/*.db
