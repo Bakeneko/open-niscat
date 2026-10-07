@@ -168,6 +168,15 @@ func (s *Store) Close() error {
 	return nil
 }
 
+// Ping checks that the database still answers a read (an already open file can outlive its removal).
+func (s *Store) Ping(ctx context.Context) error {
+	var n int
+	if err := s.db.QueryRowContext(ctx, "SELECT count(*) FROM sqlite_schema").Scan(&n); err != nil {
+		return fmt.Errorf("ping data.db: %w", err)
+	}
+	return nil
+}
+
 // Manifest returns the data directory manifest.
 func (s *Store) Manifest() Manifest { return s.manifest }
 

@@ -2,8 +2,11 @@
 package api
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"io/fs"
+	"log/slog"
 	"net/http"
 	"os"
 	"path"
@@ -22,10 +25,11 @@ type server struct {
 
 type handlerFunc func(r *http.Request) (any, error)
 
-// New returns the HTTP handler: /api/... JSON, /files/... data files, anything else the SPA.
+// New returns the HTTP handler: /api/... JSON, /files/... data files, /health probe, anything else the SPA.
 func New(store *catalog.Store, web fs.FS, defaultLang catalog.Lang, appVersion string) http.Handler {
 	s := &server{store: store, web: web, defaultLang: defaultLang, appVersion: appVersion}
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /health", s.health)
 	mux.HandleFunc("GET /api/meta", s.json(s.meta))
 	mux.HandleFunc("GET /api/vin/{vin}", s.json(s.vin))
 	mux.HandleFunc("GET /api/catalogs", s.json(s.catalogs))
@@ -108,6 +112,18 @@ func (s *server) langAndScope(r *http.Request) (catalog.Lang, *catalog.Scope, er
 		return "", nil, err
 	}
 	return l, sc, nil
+}
+
+// health is the container probe: 200 while the database answers, 503 otherwise.
+func (s *server) health(w http.ResponseWriter, r *http.Request) {
+	if err := s.store.Ping(r.Context()); err != nil {
+		if !errors.Is(err, context.Canceled) {
+			slog.Error("health check failed", "err", err)
+		}
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"status": "unavailable"})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
 func (s *server) meta(*http.Request) (any, error) {

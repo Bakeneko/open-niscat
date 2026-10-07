@@ -223,3 +223,50 @@ func TestWireShapes(t *testing.T) {
 		t.Errorf("catalog langs = %v", cat["langs"])
 	}
 }
+
+func TestHealth(t *testing.T) {
+	h := newServer(t)
+	rec := get(t, h, "/health")
+	if rec.Code != http.StatusOK || decode(t, rec)["status"] != "ok" {
+		t.Fatalf("GET /health = %d %q", rec.Code, rec.Body.String())
+	}
+	head := httptest.NewRecorder()
+	h.ServeHTTP(head, httptest.NewRequestWithContext(context.Background(), http.MethodHead, "/health", http.NoBody))
+	if head.Code != http.StatusOK {
+		t.Fatalf("HEAD /health = %d", head.Code)
+	}
+}
+
+func TestHealthWithClosedDatabase(t *testing.T) {
+	store, err := catalog.Open(context.Background(), catalogtest.NewDataDir(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := api.New(store, fstest.MapFS{}, catalog.LangEN, "dev")
+	_ = store.Close()
+	var logs strings.Builder
+	prev := slog.Default()
+	slog.SetDefault(slog.New(slog.NewTextHandler(&logs, nil)))
+	t.Cleanup(func() { slog.SetDefault(prev) })
+	rec := get(t, h, "/health")
+	if rec.Code != http.StatusServiceUnavailable || decode(t, rec)["status"] != "unavailable" {
+		t.Fatalf("closed database: %d %q", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(logs.String(), "health check failed") {
+		t.Fatalf("failure not logged: %q", logs.String())
+	}
+}
+
+func TestCancelledHealthIsNotLogged(t *testing.T) {
+	h := newServer(t)
+	var logs strings.Builder
+	prev := slog.Default()
+	slog.SetDefault(slog.New(slog.NewTextHandler(&logs, nil)))
+	t.Cleanup(func() { slog.SetDefault(prev) })
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequestWithContext(ctx, http.MethodGet, "/health", http.NoBody))
+	if logs.Len() != 0 {
+		t.Fatalf("cancelled probe logged: %s", logs.String())
+	}
+}
