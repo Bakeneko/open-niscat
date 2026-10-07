@@ -38,16 +38,18 @@ type Manifest struct {
 // Lang is a supported interface/data language.
 type Lang string
 
-// Supported languages.
+// Supported languages: those of the NISCAT data (the 01/2015 edition has no Italian).
 const (
 	LangEN Lang = "en"
 	LangFR Lang = "fr"
+	LangES Lang = "es"
+	LangDE Lang = "de"
 )
 
 // ParseLang validates a language code.
 func ParseLang(s string) (Lang, error) {
 	switch l := Lang(s); l {
-	case LangEN, LangFR:
+	case LangEN, LangFR, LangES, LangDE:
 		return l, nil
 	}
 	return "", fmt.Errorf("%w: unsupported language %q", ErrInvalid, s)
@@ -190,7 +192,7 @@ func (s *Store) langFilter(alias string, want Lang) (cond string, args []any) {
 // availableLangs lists the data languages present for a series, in display order.
 func (s *Store) availableLangs(etd string) []string {
 	out := []string{}
-	for _, l := range []string{"en", "fr", "es", "de", "it"} {
+	for _, l := range []string{"en", "fr", "es", "de"} {
 		if s.langs[etd][l] {
 			out = append(out, l)
 		}

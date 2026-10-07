@@ -92,8 +92,8 @@ func TestErrors(t *testing.T) {
 		want string
 	}{
 		"unknown key":          {file: "colour = \"red\"\n", want: "unknown key"},
-		"invalid lang in file": {file: "default_lang = \"de\"\n", want: "default_lang"},
-		"invalid lang flag":    {args: []string{"--default-lang", "es"}, want: "default_lang"},
+		"invalid lang in file": {file: "default_lang = \"it\"\n", want: "default_lang"},
+		"invalid lang flag":    {args: []string{"--default-lang", "nl"}, want: "default_lang"},
 		"empty addr":           {file: "addr = \"\"\n", want: "addr"},
 		"missing explicit":     {args: []string{"--config", filepath.Join(base, "nope.toml")}, want: "nope.toml"},
 		"bad toml":             {file: "addr = \n", want: "open-niscat.toml"},
@@ -118,5 +118,13 @@ func TestVersionFlagSkipsTheConfigFile(t *testing.T) {
 	writeConfig(t, dir, "addr = \n") // invalid: --version must not need a readable configuration
 	if _, err := config.Load([]string{"--version"}, dir); !errors.Is(err, config.ErrVersion) {
 		t.Fatalf("Load(--version) = %v, want ErrVersion", err)
+	}
+}
+
+func TestDefaultLangAcceptsTheFourDataLanguages(t *testing.T) {
+	for _, l := range []string{"en", "fr", "es", "de"} {
+		if cfg, err := config.Load([]string{"--default-lang", l}, t.TempDir()); err != nil || cfg.DefaultLang != l {
+			t.Errorf("--default-lang %s = %+v, %v", l, cfg, err)
+		}
 	}
 }

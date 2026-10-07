@@ -73,7 +73,9 @@ func TestJSONEndpoints(t *testing.T) {
 		{"/api/sections/AA/230A?vin=VSKBEC220U0990494&lang=fr", 200, func(m map[string]any) bool {
 			return m["applicable"] == true && len(m["lines"].([]any)) == 3
 		}},
-		{"/api/sections/AA/230A?lang=de", 400, nil},
+		{"/api/sections/AA/230A?lang=it", 400, nil},
+		// The fixture has no German: the series falls back to English.
+		{"/api/sections/AA/230A?lang=de", 200, func(m map[string]any) bool { return m["name"] == "ALTERNATOR FITTING" }},
 		{"/api/sections/AA/230A?vin=NOPE", 404, nil},
 		{"/api/search?q=palier&type=parts&lang=fr", 200, func(m map[string]any) bool { return m["total"] == float64(2) }},
 		{"/api/search?q=%22)%20OR%201%3D1&type=sections", 200, nil},

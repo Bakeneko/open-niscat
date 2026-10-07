@@ -12,5 +12,5 @@ addr = "127.0.0.1:8080"
 # Open the default browser on startup.
 open_browser = true
 
-# Language offered on "/" when the browser has no stored preference: "en" or "fr".
+# Language offered on "/" when the browser has no stored preference: "en", "fr", "es" or "de".
 default_lang = "en"

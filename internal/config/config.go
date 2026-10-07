@@ -24,7 +24,7 @@ type Config struct {
 	Data        string // absolute data directory
 	Addr        string // listen address
 	OpenBrowser bool   // open the default browser on startup
-	DefaultLang string // language offered on "/" ("en" or "fr")
+	DefaultLang string // language offered on "/" ("en", "fr", "es" or "de")
 }
 
 // Defaults returns the built-in settings (Data is relative to the binary directory).
@@ -48,7 +48,7 @@ func Load(args []string, baseDir string) (Config, error) {
 	data := flags.String("data", "", "data directory")
 	addr := flags.String("addr", "", "listen address, e.g. 127.0.0.1:8080")
 	openBrowser := flags.Bool("open-browser", true, "open the default browser on startup")
-	defaultLang := flags.String("default-lang", "", "language offered on / (en or fr)")
+	defaultLang := flags.String("default-lang", "", "language offered on / (en, fr, es or de)")
 	showVersion := flags.Bool("version", false, "print the version and exit")
 	if err := flags.Parse(args); err != nil {
 		return Config{}, fmt.Errorf("parse flags: %w", err)
@@ -139,8 +139,10 @@ func (c *Config) validate() error {
 	if strings.TrimSpace(c.Addr) == "" {
 		return errors.New("addr must not be empty")
 	}
-	if c.DefaultLang != "en" && c.DefaultLang != "fr" {
-		return fmt.Errorf("default_lang must be \"en\" or \"fr\", got %q", c.DefaultLang)
+	switch c.DefaultLang {
+	case "en", "fr", "es", "de":
+	default:
+		return fmt.Errorf("default_lang must be \"en\", \"fr\", \"es\" or \"de\", got %q", c.DefaultLang)
 	}
 	return nil
 }

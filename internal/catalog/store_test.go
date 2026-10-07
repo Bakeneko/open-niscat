@@ -61,11 +61,13 @@ func TestOpenRejectsBadDataDirs(t *testing.T) {
 }
 
 func TestParseLang(t *testing.T) {
-	if l, err := catalog.ParseLang("fr"); err != nil || l != catalog.LangFR {
-		t.Fatalf("ParseLang(fr) = %q, %v", l, err)
+	for in, want := range map[string]catalog.Lang{"en": catalog.LangEN, "fr": catalog.LangFR, "es": catalog.LangES, "de": catalog.LangDE} {
+		if l, err := catalog.ParseLang(in); err != nil || l != want {
+			t.Errorf("ParseLang(%s) = %q, %v", in, l, err)
+		}
 	}
-	if _, err := catalog.ParseLang("de"); err == nil {
-		t.Fatal("de must be rejected")
+	if _, err := catalog.ParseLang("it"); err == nil {
+		t.Fatal("it must be rejected: the data has no Italian")
 	}
 }
 
