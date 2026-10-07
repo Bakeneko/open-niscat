@@ -45,6 +45,14 @@ const showAll = ref(false)
 const spots = computed(() =>
   groupHotspots(data.value?.hotspots ?? [], data.value?.sections ?? [], showAll.value),
 )
+// A hotspot hidden again (non-applicable sections switched off) must not keep filtering the list.
+watch(
+  () => spots.value.shown,
+  (shown) => {
+    if (selected.value !== null && !shown.some((h) => h.key === selected.value))
+      selected.value = null
+  },
+)
 const sections = computed(() =>
   (data.value?.sections ?? []).filter(
     (s) =>
