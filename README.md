@@ -2,9 +2,37 @@
 
 Browse the NISCAT parts catalog (Nissan Motor Ibérica light commercial vehicles and trucks, edition 01/2015) in a web browser: identify a vehicle by VIN, navigate the exploded views, search parts, follow supersessions, and build a parts list to copy, export or share.
 
-The catalog data is **not** included: it is licensed by Nissan. You need your own `data/` folder (`data.db`, `manifest.json`, `img/`, `gindex/`, `cinfo/`).
+A single binary serves the catalog and its web interface: copy it next to a `data/` folder on a workshop PC and open a browser. Phones and tablets of the local network can use it too.
 
-*Version française : [README.fr.md](README.fr.md).*
+The catalog data is **not** included: it is licensed by Nissan. You need your own `data/` folder (see [Data](#data)).
+
+*French version : [README.fr.md](README.fr.md).*
+
+## Features
+
+- **Vehicle identification**: by full VIN or by its last 6+ characters, or by catalog and model code (filters on engine, body, transmission…). The vehicle sheet lists its attributes, documents and the general index.
+- **Exploded views**: group indexes and parts plates with zoom (wheel, pinch), pan, clickable callouts and quick tooltips; the callout numbers are written over the drawings as NISCAT does.
+- **Applicability**: sections and parts that do not apply to the vehicle are hidden or greyed; parts outside the vehicle's production date are flagged, never hidden.
+- **Search**: VINs, sections and parts (reference or text), limited to the current vehicle or across all vehicles.
+- **Supersessions**: alternative and latest known part numbers, and every plate where a part is used.
+- **Parts list**: kept in the browser, quantities, copy for a spreadsheet, CSV export, print / PDF, and a share link that opens the same list elsewhere.
+- **Shareable URLs**: every page (vehicle, plate, selected callout, search, list) has its own link.
+- English and French interface; designed for desktop and mobile; plates print as drawing then parts table.
+
+## Data
+
+The `data/` folder holds the catalog converted from a NISCAT installation (edition 01/2015):
+
+```
+data/
+├── manifest.json   schema, data version and edition
+├── data.db         SQLite database (catalogs, VINs, model codes, sections, parts, hotspots)
+├── img/<series>/   parts plates (PNG)
+├── gindex/<series>/  group index drawings (PNG)
+└── cinfo/<series>/   catalog documents (PDF)
+```
+
+The program opens `data.db` read-only and refuses a folder whose `manifest.json` schema it does not support.
 
 ## Run
 
@@ -37,7 +65,9 @@ make lint test     # Go + frontend
 make build         # frontend, then binaries for Linux and Windows in dist/
 ```
 
-Development: `make run` (API on :8080 with `./data`) and `npm --prefix web run dev` (Vite with hot reload, proxies `/api` and `/files`).
+Development: `make run` (API on :8080 with `./data`) and `npm --prefix web run dev` (Vite with hot reload on :5173, proxies `/api` and `/files`).
+
+Tests use a small synthetic catalog; the tests against the real catalog run only when `data/` is present.
 
 ## License and data
 

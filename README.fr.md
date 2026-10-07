@@ -2,9 +2,37 @@
 
 Consultez le catalogue de pièces NISCAT (véhicules utilitaires légers et camions Nissan Motor Ibérica, édition 01/2015) dans un navigateur : identification d'un véhicule par son VIN, navigation dans les vues éclatées, recherche de pièces, suivi des remplacements, et constitution d'une liste de pièces à copier, exporter ou partager.
 
-Les données du catalogue ne sont **pas** fournies : elles sont sous licence Nissan. Il vous faut votre propre dossier `data/` (`data.db`, `manifest.json`, `img/`, `gindex/`, `cinfo/`).
+Un seul binaire sert le catalogue et son interface web : copiez-le à côté d'un dossier `data/` sur un poste d'atelier et ouvrez un navigateur. Les téléphones et tablettes du réseau local peuvent aussi l'utiliser.
+
+Les données du catalogue ne sont **pas** fournies : elles sont sous licence Nissan. Il vous faut votre propre dossier `data/` (voir [Données](#données)).
 
 *English version: [README.md](README.md).*
+
+## Fonctionnalités
+
+- **Identification du véhicule** : par VIN complet ou par ses 6 derniers caractères (ou plus), ou par catalogue et code modèle (filtres sur le moteur, la carrosserie, la boîte…). La fiche véhicule présente ses caractéristiques, ses documents et l'index général.
+- **Vues éclatées** : index de groupe et planches de pièces avec zoom (molette, pincement), déplacement, repères cliquables et infobulles rapides ; les numéros des repères sont réécrits sur les dessins comme dans NISCAT.
+- **Applicabilité** : les sections et pièces qui ne concernent pas le véhicule sont masquées ou grisées ; les pièces hors de la date de production du véhicule sont signalées, jamais masquées.
+- **Recherche** : VIN, sections et pièces (référence ou texte), limitée au véhicule actif ou sur tous les véhicules.
+- **Remplacements** : références alternatives et dernière référence connue, et toutes les planches où une pièce est utilisée.
+- **Liste de pièces** : conservée dans le navigateur, quantités, copie pour un tableur, export CSV, impression / PDF, et lien de partage qui ouvre la même liste ailleurs.
+- **URL partageables** : chaque page (véhicule, planche, repère sélectionné, recherche, liste) a son propre lien.
+- Interface en anglais et en français ; pensée pour l'ordinateur comme pour le mobile ; les planches s'impriment dessin puis tableau des pièces.
+
+## Données
+
+Le dossier `data/` contient le catalogue converti depuis une installation de NISCAT (édition 01/2015) :
+
+```
+data/
+├── manifest.json   schéma, version des données et édition
+├── data.db         base SQLite (catalogues, VIN, codes modèle, sections, pièces, repères)
+├── img/<série>/    planches de pièces (PNG)
+├── gindex/<série>/ dessins des index de groupe (PNG)
+└── cinfo/<série>/  documents des catalogues (PDF)
+```
+
+Le programme ouvre `data.db` en lecture seule et refuse un dossier dont le schéma indiqué dans `manifest.json` n'est pas pris en charge.
 
 ## Lancer
 
@@ -37,7 +65,9 @@ make lint test     # Go + frontend
 make build         # frontend, puis binaires Linux et Windows dans dist/
 ```
 
-Développement : `make run` (API sur :8080 avec `./data`) et `npm --prefix web run dev` (Vite avec rechargement à chaud, relaie `/api` et `/files`).
+Développement : `make run` (API sur :8080 avec `./data`) et `npm --prefix web run dev` (Vite avec rechargement à chaud sur :5173, relaie `/api` et `/files`).
+
+Les tests utilisent un petit catalogue synthétique ; les tests sur le vrai catalogue ne s'exécutent que si `data/` est présent.
 
 ## Licence et données
 
