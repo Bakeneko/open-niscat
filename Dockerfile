@@ -9,7 +9,7 @@ COPY web/ ./
 RUN npm run build
 
 # Go cross-compiles (pure Go SQLite, no cgo): no emulation needed for the target architecture.
-FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS build
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS build
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
