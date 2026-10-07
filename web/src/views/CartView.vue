@@ -13,6 +13,7 @@ import { useLinks } from '@/composables/useLinks'
 import { useNotify } from '@/composables/useNotify'
 import { decodeCart, encodeCart, toCSV, toTSV, type CartItem, type CartRow } from '@/lib/cart'
 import { localizedPath } from '@/lib/lang'
+import { readable } from '@/lib/format'
 import { refPath } from '@/lib/refs'
 import { scopeLabel, scopeToQuery } from '@/lib/scope'
 
@@ -198,13 +199,11 @@ function removeMissing() {
     <v-alert v-if="items.length === 0" type="info" variant="tonal">{{ t('cart.empty') }}</v-alert>
     <v-progress-linear v-if="loading" indeterminate />
     <ErrorAlert :error="error" @retry="reload" />
-    <v-table v-if="data && items.length > 0" density="compact" hover>
+    <v-table v-if="data && items.length > 0" density="compact" hover class="list-table">
       <thead>
         <tr>
-          <th>{{ t('part.reference') }}</th>
-          <th>{{ t('part.description') }}</th>
+          <th>{{ t('part.part') }}</th>
           <th>{{ t('cart.section') }}</th>
-          <th>{{ t('cart.vehicle') }}</th>
           <th class="text-right">{{ t('cart.qty') }}</th>
           <th v-if="!shared" class="no-print" />
         </tr>
@@ -216,18 +215,25 @@ function removeMissing() {
           class="cart-row"
           @click="router.push(sectionLink(i, l))"
         >
-          <td class="text-no-wrap">
-            <RouterLink :to="links.to(refPath(l.partNo), {}, false)" @click.stop>{{
-              l.partNo
-            }}</RouterLink>
+          <!-- Same "Part" cell as the plate table: number, then description. -->
+          <td class="part-cell">
+            <RouterLink
+              :to="links.to(refPath(l.partNo), {}, false)"
+              class="font-weight-bold text-no-wrap"
+              @click.stop
+              >{{ l.partNo }}</RouterLink
+            >
+            <div>{{ readable(l.description) }}</div>
           </td>
-          <td>{{ l.description }}</td>
-          <td class="text-no-wrap">
-            <RouterLink :to="sectionLink(i, l)" @click.stop
+          <!-- The vehicle the line was added for sits under its plate: one column less on phones. -->
+          <td>
+            <RouterLink :to="sectionLink(i, l)" class="text-no-wrap" @click.stop
               >{{ l.etd }} {{ l.sec }} / {{ l.item || l.itemKey }}</RouterLink
             >
+            <div v-if="i.scope" class="text-caption text-medium-emphasis vehicle-label">
+              {{ scopeLabel(i.scope) }}
+            </div>
           </td>
-          <td class="text-caption">{{ i.scope ? scopeLabel(i.scope) : '' }}</td>
           <td class="text-right" @click.stop>
             <span v-if="shared">{{ i.qty }}</span>
             <v-text-field
@@ -237,7 +243,8 @@ function removeMissing() {
               min="1"
               density="compact"
               hide-details
-              style="max-width: 90px; margin-left: auto"
+              class="qty-field"
+              hide-spin-buttons
               @update:model-value="(v) => setQty(i.id, v)"
             />
           </td>
@@ -259,5 +266,25 @@ function removeMissing() {
 <style scoped>
 .cart-row {
   cursor: pointer;
+}
+.part-cell {
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+.qty-field {
+  width: 48px;
+  margin-left: auto;
+}
+.qty-field :deep(.v-field__input) {
+  padding-inline: 4px;
+  text-align: center;
+}
+.vehicle-label {
+  overflow-wrap: anywhere;
+}
+/* Tight cells, as in the plate table: the list must fit a phone screen. */
+.list-table :deep(th),
+.list-table :deep(td) {
+  padding: 0 5px;
 }
 </style>
