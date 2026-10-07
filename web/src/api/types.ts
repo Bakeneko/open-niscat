@@ -91,27 +91,36 @@ export interface RefLink {
 export interface Line {
   id: string
   pospie: number
+  /** NISCAT mark shown before the callout: "*", "#" or "" (meaning undocumented). */
   mark: string
+  /** Drawing number as printed, on an item's first line only. */
   item: string
+  /** Drawing number without leading zeros, on every line; matches Hotspot.key. */
   itemKey: string
   variant: string
   /** "01-02": drawing number then line number within the item (set on every line). */
   callout: string
+  /** Indentation level (1-5): sub-assemblies are deeper. */
   level: number
   partNo: string
   partKey: string
   description: string
   spec: string
   qty: string
+  /** Shown in brackets after the quantity, as NISCAT does (meaning undocumented). */
   cap: string
+  /** Probably an interchangeability code ("2-0"); not documented by NISCAT. */
   ica: string
+  /** Models this line applies to (free text). */
   app: string
   from: YearMonth | null
   to: YearMonth | null
   inPeriod?: boolean
   alternative: string
   alternativeKey: string
+  /** K.D. flag ("*"), probably knock-down kits for local assembly. */
   kd: string
+  /** Part Name Code: the 5-digit base shared by the variants of a part. */
   pnc: string
   latest?: RefLink
 }

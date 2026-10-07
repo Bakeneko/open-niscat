@@ -20,6 +20,7 @@ function keepDistPlaceholder(): Plugin {
 export default defineConfig({
   plugins: [vue(), vuetify({ autoImport: true }), keepDistPlaceholder()],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
+  // Vuetify makes one large chunk; the default 500 kB warning is only noise for a local tool.
   build: { chunkSizeWarningLimit: 2000 },
   server: { proxy: { '/api': 'http://127.0.0.1:8080', '/files': 'http://127.0.0.1:8080' } },
 })

@@ -30,7 +30,7 @@ export function useFetch<T>(url: () => string | null): Fetched<T> {
         error.value = e instanceof Error ? e : new Error(String(e))
       }
     } finally {
-      if (ctrl === c) loading.value = false
+      if (ctrl === c) loading.value = false // a superseded request must not end the newer one's loading
     }
   }
 

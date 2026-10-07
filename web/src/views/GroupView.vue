@@ -22,7 +22,7 @@ const links = useLinks()
 const { mdAndUp } = useDisplay()
 const { current } = useScope()
 const cat = computed(() => String(route.params.cat))
-const etd = computed(() => cat.value.slice(0, 2))
+const etd = computed(() => cat.value.slice(0, 2)) // a catalog id is <series>-<period>, e.g. AA-G01
 const { data, error, loading, reload } = useFetch<GroupDetail>(() =>
   apiPath(`/api/catalogs/${cat.value}/groups/${String(route.params.group)}`, {
     lang: lang.value,
@@ -31,6 +31,7 @@ const { data, error, loading, reload } = useFetch<GroupDetail>(() =>
 )
 
 // The viewer selects by hotspot key (caption without leading zeros); sections match on the caption itself.
+// Not in the URL on purpose: a passing filter on this page, not state worth sharing.
 const selected = ref<string | null>(null)
 const caption = computed(
   () => data.value?.hotspots.find((h) => h.key === selected.value)?.caption ?? null,

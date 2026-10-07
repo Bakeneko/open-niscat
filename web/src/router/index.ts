@@ -51,7 +51,7 @@ router.beforeEach(async (to) => {
   const first = firstNavigation
   firstNavigation = false
 
-  // Language on "/": stored preference, else the server default (spec §4).
+  // Bare "/" on first load: the stored language, else the server default; English stays unprefixed.
   if (first && to.path === '/' && Object.keys(to.query).length === 0) {
     const stored = load('open-niscat.lang', isLang)
     const pref =
@@ -62,7 +62,8 @@ router.beforeEach(async (to) => {
     if (pref !== 'en') return { path: `/${pref}`, replace: true }
   }
 
-  // Pages that need a vehicle get the remembered one when the URL has none (spec §5).
+  // Vehicle scope guard: a scoped page without a vehicle in the URL gets the remembered one, so the URL
+  // stays the source of truth (shareable).
   if (to.meta.scoped === true && scopeFromQuery(to.query) === null) {
     const saved = useSavedScope().value
     const query = { ...to.query, ...scopeToQuery(saved) }

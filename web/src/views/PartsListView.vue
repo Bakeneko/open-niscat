@@ -25,6 +25,7 @@ const links = useLinks()
 const partsList = usePartsList()
 const { notify } = useNotify()
 
+// A ?items= share link shows that list read-only, without touching the stored one until it is adopted.
 const shared = computed(() =>
   typeof route.query.items === 'string' ? decodeList(route.query.items) : null,
 )
@@ -76,18 +77,23 @@ async function copy(text: string, done: string) {
     await navigator.clipboard.writeText(text)
     notify(done)
   } catch {
+    // Clipboard unavailable (e.g. plain http on another machine): show the text to copy by hand.
     notify(text)
   }
 }
 function copyTable() {
   void copy(toTSV(headers.value, rows.value), t('list.copied'))
 }
+// Share links carry ids and quantities only, not the vehicle of each line.
 function shareLink() {
   const url = `${window.location.origin}${localizedPath(lang.value, '/list')}?items=${encodeList(items.value)}`
   void copy(url, t('list.linkCopied'))
 }
 function downloadCSV() {
-  const blob = new Blob(['﻿', toCSV(headers.value, rows.value)], { type: 'text/csv;charset=utf-8' })
+  // The leading BOM makes Excel read the file as UTF-8.
+  const blob = new Blob(['\uFEFF', toCSV(headers.value, rows.value)], {
+    type: 'text/csv;charset=utf-8',
+  })
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
   a.download = `open-niscat-parts-list-${new Date().toISOString().slice(0, 10)}.csv`
@@ -102,7 +108,7 @@ function adoptShared(mode: 'replace' | 'merge') {
   if (s === null) return
   if (mode === 'replace') partsList.replace(s.items)
   else partsList.merge(s.items)
-  void router.replace(links.to('/list', {}, false))
+  void router.replace(links.to('/list', {}, false)) // back to the stored list (drops ?items=)
 }
 // Only whole quantities >= 1 are applied: an emptied field while typing must not delete the line.
 function setQty(id: string, v: unknown) {

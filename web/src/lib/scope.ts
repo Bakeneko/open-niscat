@@ -11,6 +11,7 @@ function one(v: LocationQueryValue | LocationQueryValue[] | undefined): string |
   return typeof s === 'string' && s.trim() !== '' ? s.trim() : undefined
 }
 
+/** A VIN takes precedence: cat/model are ignored when vin is present. */
 export function scopeFromQuery(q: LocationQuery): Scope | null {
   const vin = one(q.vin)
   if (vin !== undefined) return { vin }

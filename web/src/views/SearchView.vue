@@ -97,8 +97,8 @@ watch(
 function sectionLink(p: LineRef) {
   return links.to(`/section/${p.etd}/${p.sec}`, { item: p.itemKey })
 }
-// A new page starts from its first results.
-// The page belongs to the open tab: an automatically chosen tab is written too, so the offset applies.
+// The page belongs to the open tab, so an automatically chosen tab is written too (the offset applies to
+// it); then back to the first result.
 function setPage(n: number) {
   setQuery(type.value === null ? { page: String(n) } : { page: String(n), type: type.value })
   window.scrollTo({ top: 0 })
@@ -190,9 +190,8 @@ function setAll(v: boolean | null) {
         />
       </v-list>
       <v-list v-else-if="type === 'parts'" density="compact" lines="two">
-        <!-- Like the plate table and the parts list: the part number opens the part page, the rest of the row the
-             plate with the item selected. The plate link is stretched over the whole row (a real link, so
-             Ctrl/middle-click open a tab) and the part number sits above it: no link inside a link. -->
+        <!-- The section link is stretched over the row (a real link: Ctrl/middle-click work); the part number
+             sits above it and opens the part page (no nested links). -->
         <v-list-item v-for="p in data.parts" :key="p.id" class="part-hit">
           <template #title>
             <RouterLink

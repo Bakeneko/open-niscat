@@ -13,8 +13,10 @@ export interface ListRow {
   section: string
 }
 
+// Bounds the stored list and the length of share links.
 export const MAX_ITEMS = 500
 const MAX_QTY = 9999
+// Line id: series (2 letters) + pospie, the row number in the NISCAT parts table (see lineId in refs.ts).
 const ID = /^([A-Z]{2})0*([1-9]\d*)$/
 
 /** Canonical line id ("aa02605" -> "AA2605", as the API returns it), or null when malformed. */
@@ -102,6 +104,7 @@ export function toTSV(headers: readonly string[], rows: readonly ListRow[]): str
   return [headers, ...rows.map(cells)].map((r) => r.map(clean).join('\t')).join('\r\n')
 }
 
+// Semicolons and CRLF: what Excel expects in French and German locales.
 export function toCSV(headers: readonly string[], rows: readonly ListRow[]): string {
   return [headers, ...rows.map(cells)].map((r) => r.map(quote).join(';')).join('\r\n') + '\r\n'
 }

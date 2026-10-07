@@ -24,10 +24,11 @@ const box = ref<HTMLDivElement | null>(null)
 const view = ref<View>({ scale: 1, x: 0, y: 0 })
 const natural = ref({ w: 0, h: 0 })
 const fitted = ref(1)
+// Pixels of travel before a press becomes a pan (and only then is the pointer captured).
 const DRAG_THRESHOLD = 6
-
-const failed = ref(false)
+// Max delay between two background taps that refit the drawing.
 const DOUBLE_TAP_MS = 300
+const failed = ref(false)
 
 // Pointers are tracked by hand: capture starts only once a drag begins, so a plain click still reaches the
 // hotspot under it; a hotspot is activated on release when the gesture stayed a tap (one pointer, no drag).
@@ -52,6 +53,7 @@ const spotStyle = (h: Hotspot) => {
     ? { display: 'none' }
     : { left: pct(h.x, w), top: pct(h.y, ih), width: pct(h.w, w), height: pct(h.h, ih) }
 }
+// Caption height: 60% of the zone, in cqw so it scales with the stage on screen and in print.
 const captionStyle = (h: Hotspot) => ({
   fontSize: natural.value.w === 0 ? '0' : `${String(((h.h * 0.6) / natural.value.w) * 100)}cqw`,
 })
@@ -80,8 +82,8 @@ function zoom(factor: number, at?: { x: number; y: number }) {
     factor,
     p.x,
     p.y,
-    fitted.value * 0.5,
-    Math.max(4, fitted.value * 8),
+    fitted.value * 0.5, // zoom out to half the fitted size
+    Math.max(4, fitted.value * 8), // zoom in to 8x the fitted size, at least 4x the image's pixels
   )
 }
 function onWheel(e: WheelEvent) {
@@ -194,6 +196,7 @@ function onKeySpot(e: MouseEvent, key: string) {
 let resize: ResizeObserver | null = null
 onMounted(() => {
   if (box.value !== null) {
+    // Refit on resize only while the user has not zoomed away from the fitted view.
     resize = new ResizeObserver(() => {
       if (view.value.scale === fitted.value) fit()
     })
@@ -207,7 +210,7 @@ onBeforeUnmount(() => {
 watch(
   () => props.src,
   () => {
-    natural.value = { w: 0, h: 0 }
+    natural.value = { w: 0, h: 0 } // hides the hotspots until the new image has loaded
     failed.value = false
     pointers.clear()
     hideTip()
@@ -303,8 +306,7 @@ watch(
   border-color: rgb(211, 47, 47);
   outline: none;
 }
-/* Labelled hotspots (group indexes), like NISCAT: the caption is written in red on an opaque white patch
-   hiding the stale printed number; the clickable zone itself stays invisible until hovered. */
+/* NISCAT-style captions: red text on a white patch hiding the printed number; the zone stays invisible. */
 .hotspot.labelled {
   display: flex;
   align-items: center;
@@ -404,6 +406,7 @@ watch(
   .hotspot.labelled {
     border-color: transparent !important;
   }
+  /* !important beats the inline pan/zoom styles; every caption prints in NISCAT red (list/selection are screen-only). */
   .hotspot .caption {
     box-shadow: none !important;
     outline: none !important;

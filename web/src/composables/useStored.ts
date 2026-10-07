@@ -13,6 +13,7 @@ export function useStored<T>(
   if (existing !== undefined) return existing as Ref<T>
   const state = ref(load(key, guard) ?? fallback()) as Ref<T>
   instances.set(key, state)
+  // Another tab changed the key (e.key === null: it cleared localStorage).
   window.addEventListener('storage', (e) => {
     if (e.key === key || e.key === null) state.value = load(key, guard) ?? fallback()
   })

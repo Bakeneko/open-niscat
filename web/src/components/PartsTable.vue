@@ -21,6 +21,7 @@ const hasDetails = (l: Line) =>
 function closeDetails(l: Line) {
   if ((window.getSelection()?.toString() ?? '') === '') emit('select', l.itemKey)
 }
+// 12 px per NISCAT indentation level below the first, on top of the cell padding.
 const indent = (l: Line) => ({ paddingLeft: `${String(Math.max(l.level - 1, 0) * 12 + 6)}px` })
 </script>
 

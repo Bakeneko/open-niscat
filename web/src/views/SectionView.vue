@@ -25,11 +25,6 @@ const router = useRouter()
 const lang = useLang()
 const links = useLinks()
 const partsList = usePartsList()
-// Items with a line in the parts list: their callouts turn green on the drawing.
-const listed = computed(() => {
-  const ids = new Set(partsList.items.value.map((i) => i.id))
-  return [...new Set((data.value?.lines ?? []).filter((l) => ids.has(l.id)).map((l) => l.itemKey))]
-})
 const history = useHistory()
 const { notify } = useNotify()
 const { current } = useScope()
@@ -43,7 +38,13 @@ const { data, error, loading, reload } = useFetch<Section>(() =>
     ...scopeToQuery(current.value),
   }),
 )
+// Items with a line in the parts list: their callouts turn green on the drawing.
+const listed = computed(() => {
+  const ids = new Set(partsList.items.value.map((i) => i.id))
+  return [...new Set((data.value?.lines ?? []).filter((l) => ids.has(l.id)).map((l) => l.itemKey))]
+})
 
+// Item keys have no leading zeros (like hotspot keys); "?item=01" from older or hand-written links still works.
 const selected = computed(() => {
   const v = route.query.item
   return typeof v === 'string' && v !== '' ? v.replace(/^0+(?=.)/, '') : null
@@ -51,6 +52,7 @@ const selected = computed(() => {
 const tab = computed(() => (route.query.tab === 'info' ? 'info' : 'drawing'))
 const titles = computed(() => {
   const out: Record<string, string> = {}
+  // An item can have several lines (variants): its tooltip shows the first one.
   for (const l of data.value?.lines ?? []) out[l.itemKey] ??= `${l.partNo} ${l.description}`
   return out
 })
@@ -69,7 +71,8 @@ function print() {
   window.print()
 }
 
-// Selecting the selected item again closes it.
+// Selection and tab live in the URL (replace: no history entry per click). Selecting the selected item again
+// closes it; on phones, selecting shows the parts tab.
 function select(key: string) {
   const query = { ...route.query }
   if (key === selected.value) delete query.item
@@ -211,7 +214,7 @@ watch([selected, data], async ([key, s]) => {
     overflow: visible;
   }
   .print-show {
-    display: block !important;
+    display: block !important; /* beats v-show's inline display: none so both panes print */
   }
 }
 </style>
