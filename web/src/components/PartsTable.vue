@@ -78,14 +78,18 @@ const indent = (l: Line) => ({ paddingLeft: `${String(Math.max(l.level - 1, 0) *
           </td>
         </tr>
         <!-- Details of the selected item open in place, under each of its lines. -->
-        <tr v-if="isSelected(l) && hasDetails(l)" class="detail-row">
+        <tr
+          v-if="isSelected(l) && hasDetails(l)"
+          class="detail-row"
+          @click="emit('select', l.itemKey)"
+        >
           <td />
           <td colspan="3">
             <dl class="details">
               <template v-if="l.alternative">
                 <dt>{{ t('part.alternative') }}</dt>
                 <dd>
-                  <RouterLink :to="links.to(refPath(l.alternative), {}, false)">{{
+                  <RouterLink :to="links.to(refPath(l.alternative), {}, false)" @click.stop>{{
                     l.alternative
                   }}</RouterLink>
                 </dd>
@@ -93,7 +97,7 @@ const indent = (l: Line) => ({ paddingLeft: `${String(Math.max(l.level - 1, 0) *
               <template v-if="l.latest">
                 <dt>{{ t('part.latest') }}</dt>
                 <dd>
-                  <RouterLink :to="links.to(refPath(l.latest.partNo), {}, false)">{{
+                  <RouterLink :to="links.to(refPath(l.latest.partNo), {}, false)" @click.stop>{{
                     l.latest.partNo
                   }}</RouterLink>
                 </dd>
